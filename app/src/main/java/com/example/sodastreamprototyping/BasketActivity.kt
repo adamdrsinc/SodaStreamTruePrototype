@@ -25,6 +25,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.rememberNavController
 import com.example.sodastreamprototyping.ui.theme.SodaStreamPrototypingTheme
 
 class BasketActivity : ComponentActivity() {
@@ -143,14 +146,23 @@ fun BasketItems(){
     val context = LocalContext.current
     val currentActivity = context as Activity
 
+    val navController = rememberNavController()
+
+
+    //var basketItems = remember(mutableListOf(Basket.getDrinks()))
+    val drinks = remember {
+        mutableStateListOf<Drink>().apply {
+            Basket.basketDrinks.let { addAll(it) }
+        }
+    }
 
     LazyColumn(
         modifier = Modifier
             .height((screenHeight * 0.80).dp)
             .width(screenWidth.dp)
     ){
-        itemsIndexed(Basket.getDrinks()){
-                id, item ->
+        itemsIndexed(drinks){
+                index, item ->
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -265,9 +277,10 @@ fun BasketItems(){
                 Row(){
                     Button(
                         onClick = {
-                            val intent = Intent(currentActivity, com.example.sodastreamprototyping.EditDrinkActivity::class.java)
+                            /*val intent = Intent(currentActivity, EditDrinkActivity::class.java)
                             intent.putExtra("drinkID", item.drinkID)
-                            currentActivity.startActivity(intent)
+                            currentActivity.startActivity(intent)*/
+
                         },
                         modifier = Modifier
                             .padding(4.dp)
@@ -277,7 +290,8 @@ fun BasketItems(){
 
                     Button(
                         onClick = {
-
+                            Basket.basketDrinks.removeAt(index)
+                            drinks.removeAt(index)
                         },
                         modifier = Modifier
                             .padding(4.dp)

@@ -2,7 +2,7 @@ package com.example.sodastreamprototyping
 
 class Basket {
     companion object{
-        private val basketDrinks : ArrayList<Drink> = arrayListOf()
+        val basketDrinks : ArrayList<Drink> = arrayListOf()
 
         fun addDrink(drink: Drink){
             var alreadyDrink = basketDrinks.find{

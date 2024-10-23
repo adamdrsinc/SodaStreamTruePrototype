@@ -37,6 +37,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.rememberNavController
 import com.example.sodastreamprototyping.ui.theme.SodaStreamPrototypingTheme
 
 class EditDrinkActivity : ComponentActivity() {
@@ -51,7 +52,7 @@ class EditDrinkActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ){
-                    EditMenuComposable(drinkID = drinkID)
+                    EditMenu(drinkID = drinkID)
                 }
             }
         }
@@ -68,7 +69,7 @@ fun GreetingPreview() {
 */
 
 @Composable
-fun EditMenuComposable(drinkID: Int){
+fun EditMenu(drinkID: Int){
     val drink = Basket.getDrinks().find {
         it.drinkID == drinkID
     }
@@ -263,13 +264,14 @@ fun TitleText(text: String){
 @Composable
 fun EditDrinkBackButton(){
     val context = LocalContext.current
+    val navController = rememberNavController()
 
     Button(
         onClick = {
-
-            val currentActivity = context as Activity
+            navController.popBackStack()
+            /*val currentActivity = context as Activity
             val intent = Intent(currentActivity, com.example.sodastreamprototyping.BasketActivity::class.java)
-            currentActivity.startActivity(intent)
+            currentActivity.startActivity(intent)*/
         },
         modifier = Modifier
             .padding(16.dp)
