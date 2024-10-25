@@ -1,12 +1,15 @@
 package com.example.sodastreamprototyping
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.example.practice.ApiRequestHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -32,7 +35,7 @@ fun SignInScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        var email by remember { mutableStateOf("") }
+        var username by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
         var errorMessage by remember { mutableStateOf<String?>(null) }
 
@@ -76,9 +79,8 @@ fun SignInScreen(
                             password = password,
                             onSuccess = { response ->
                                 CoroutineScope(Dispatchers.Main).launch {
-                                    // Handle successful login (e.g., navigate to home screen)
                                     Log.d("LOGIN_SUCCESS", response.toString())
-                                    onLoginSuccess()
+                                    onSignInSuccess()
                                 }
                             },
                             onError = { error ->
