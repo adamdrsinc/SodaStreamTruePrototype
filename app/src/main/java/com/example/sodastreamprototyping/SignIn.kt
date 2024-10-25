@@ -7,12 +7,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
 fun SignInScreen(
     onSignUpClick: () -> Unit,
     onSignInSuccess: () -> Unit
 ) {
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -29,11 +37,10 @@ fun SignInScreen(
         var errorMessage by remember { mutableStateOf<String?>(null) }
 
         OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
+            value = username,
+            onValueChange = { username = it },
+            label = { Text("Username") },
             modifier = Modifier.fillMaxWidth(),
-            isError = errorMessage != null && email.isEmpty()
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -44,7 +51,6 @@ fun SignInScreen(
             label = { Text("Password") },
             modifier = Modifier.fillMaxWidth(),
             visualTransformation = PasswordVisualTransformation(),
-            isError = errorMessage != null && password.isEmpty()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -59,11 +65,29 @@ fun SignInScreen(
 
         Button(
             onClick = {
-                if (email.isEmpty() || password.isEmpty()) {
-                    errorMessage = "Please fill out both email and password fields"
+                if (username.isEmpty() || password.isEmpty()) {
+                    errorMessage = "Please fill out all fields"
                 } else {
                     errorMessage = null
-                    onSignInSuccess()
+                    CoroutineScope(Dispatchers.IO).launch {
+                        ApiRequestHelper.makeLoginRequest(
+                            context = context,
+                            username = username,
+                            password = password,
+                            onSuccess = { response ->
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    // Handle successful login (e.g., navigate to home screen)
+                                    Log.d("LOGIN_SUCCESS", response.toString())
+                                    onLoginSuccess()
+                                }
+                            },
+                            onError = { error ->
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    errorMessage = error
+                                }
+                            }
+                        )
+                    }
                 }
             },
             modifier = Modifier.fillMaxWidth()
