@@ -1,12 +1,6 @@
 package com.example.sodastreamprototyping
 
-import android.app.Activity
-import android.content.Intent
-import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,9 +14,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -37,10 +29,10 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.sodastreamprototyping.ui.theme.SodaStreamPrototypingTheme
 
-class EditDrinkActivity : ComponentActivity() {
+/*class EditDrinkActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val drinkID = intent.getIntExtra("drinkID", -1)
 
@@ -57,7 +49,7 @@ class EditDrinkActivity : ComponentActivity() {
             }
         }
     }
-}
+}*/
 
 /*
 @Preview(showBackground = true)
@@ -69,7 +61,10 @@ fun GreetingPreview() {
 */
 
 @Composable
-fun EditMenu(drinkID: Int){
+fun EditMenu(navController: NavController, drinkIDString: String?){
+
+    var drinkID = drinkIDString?.toInt()
+
     val drink = Basket.getDrinks().find {
         it.drinkID == drinkID
     }
@@ -78,7 +73,7 @@ fun EditMenu(drinkID: Int){
     val screenHeight = config.screenHeightDp
 
 
-    MainLayout { innerPadding ->
+    MainLayout(navController = navController) { innerPadding ->
         Column(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -114,14 +109,14 @@ fun EditMenu(drinkID: Int){
                 IceQuantitySlider(drinkID)
             }
 
-            EditDrinkBackButton()
+            EditDrinkBackButton(navController = navController)
         }
     }
 
 }
 
 @Composable
-fun ShowSyrupsList(drinkID: Int) {
+fun ShowSyrupsList(drinkID: Int?) {
     val context = LocalContext.current
     val config = LocalConfiguration.current
     val screenWidth = config.screenWidthDp
@@ -214,7 +209,7 @@ fun ShowSyrupsList(drinkID: Int) {
 
 
 @Composable
-fun IceQuantitySlider(drinkID: Int) {
+fun IceQuantitySlider(drinkID: Int?) {
     val config = LocalConfiguration.current
     val screenWidth = config.screenWidthDp
 
@@ -262,16 +257,10 @@ fun TitleText(text: String){
 }
 
 @Composable
-fun EditDrinkBackButton(){
-    val context = LocalContext.current
-    val navController = rememberNavController()
-
+fun EditDrinkBackButton(navController: NavController){
     Button(
         onClick = {
             navController.popBackStack()
-            /*val currentActivity = context as Activity
-            val intent = Intent(currentActivity, com.example.sodastreamprototyping.BasketActivity::class.java)
-            currentActivity.startActivity(intent)*/
         },
         modifier = Modifier
             .padding(16.dp)
@@ -286,7 +275,7 @@ fun EditDrinkBackButton(){
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CustomDrinkDropdown(drinkID: Int){
+fun CustomDrinkDropdown(drinkID: Int?){
     var isExpanded = remember{
         mutableStateOf(false)
     }

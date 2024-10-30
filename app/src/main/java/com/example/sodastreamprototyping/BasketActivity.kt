@@ -33,53 +33,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.sodastreamprototyping.ui.theme.SodaStreamPrototypingTheme
 
-class BasketActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-
-        val TEMP_DRINK_INGREDIENTS = listOf<String>(
-            "Coke",
-            "Dr. Pepper",
-            "Sprite",
-            "7-up",
-            "A & W"
-        )
-
-
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            SodaStreamPrototypingTheme() {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ){
-                    ShoppingBasket()
-                }
-            }
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun SodaStreamProtoPreview() {
-    SodaStreamPrototypingTheme() {
-        ShoppingBasket()
-    }
-}
 
 @Composable
-fun ShoppingBasket(modifier: Modifier = Modifier){
+fun ShoppingBasket(navController: NavController, modifier: Modifier = Modifier){
     val config = LocalConfiguration.current
     val screenHeight = config.screenHeightDp
 
-    MainLayout { innerPadding ->
+    MainLayout(navController = navController) {innerPadding ->
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
@@ -87,49 +55,20 @@ fun ShoppingBasket(modifier: Modifier = Modifier){
                 .verticalScroll(rememberScrollState())
                 .padding(innerPadding)
         ) {
-            BasketItems()
+            BasketItems(navController)
 
-            CheckoutButton()
-
-            /*Row(
-            ){
-                CheckoutButton()
-                //BasketBackButton()
-            }*/
+            CheckoutButton(navController)
         }
     }
 
 }
 
-/*@Composable
-fun BasketBackButton(){
-    val context = LocalContext.current
-
-    Button(
-        onClick = {
-
-            val currentActivity = context as Activity
-            val intent = Intent(currentActivity, com.example.sodastreamprototyping.MenuPage::class.java)
-            currentActivity.startActivity(intent)
-        },
-        modifier = Modifier
-            .padding(16.dp)
-    ){
-        Text(
-            text = "Back",
-            fontSize = 12.sp
-        )
-    }
-}*/
 
 @Composable
-fun CheckoutButton(){
-    val context = LocalContext.current
+fun CheckoutButton(navController: NavController){
     Button(
         onClick = {
-            val activity = context as Activity
-            val intent = Intent(activity, CheckoutActivity::class.java)
-            activity.startActivity(intent)
+            navController.navigate("checkout")
         }
     ){
         Text(
@@ -139,170 +78,102 @@ fun CheckoutButton(){
 }
 
 @Composable
-fun BasketItems(){
+fun BasketItems(navController: NavController) {
     val config = LocalConfiguration.current
     val screenWidth = config.screenWidthDp
     val screenHeight = config.screenHeightDp
-    val context = LocalContext.current
-    val currentActivity = context as Activity
 
-    val navController = rememberNavController()
-
-
-    //var basketItems = remember(mutableListOf(Basket.getDrinks()))
     val drinks = remember {
-        mutableStateListOf<Drink>().apply {
-            Basket.basketDrinks.let { addAll(it) }
-        }
+        mutableStateListOf<Drink>().apply { addAll(Basket.basketDrinks) }
     }
 
     LazyColumn(
         modifier = Modifier
             .height((screenHeight * 0.80).dp)
             .width(screenWidth.dp)
-    ){
-        itemsIndexed(drinks){
-                index, item ->
-
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .padding(16.dp)
-                    .width((screenWidth * 0.90).dp)
-                    .border(2.dp, Color.Black)
-                    .padding(24.dp)
-            ){
-                Text(
-                    text = item.name,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                )
-
-                if(item.baseDrink != null){
-                    Text(
-                        text = "Base: ${item.baseDrink.toString()}",
-                        fontSize = 16.sp
-                    )
+    ) {
+        itemsIndexed(drinks) { index, drink ->
+            BasketItemCard(
+                drink = drink,
+                screenWidth = screenWidth,
+                onEdit = { navController.navigate(Screen.Edit.withArgs(drink.drinkID.toString())) },
+                onDelete = {
+                    Basket.basketDrinks.removeAt(index)
+                    drinks.removeAt(index)
                 }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .width((screenWidth * 0.60).dp)){
-                    Row(
-                        horizontalArrangement = Arrangement.Start,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .width((screenWidth * 0.40).dp)
-                    ){
-                        Text(
-                            text = "Quantity:"
-                        )
-                    }
-                    Row(
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .width((screenWidth * 0.40).dp)
-                    ){
-                        Text(
-                            text = item.quantity.toString(),
-                        )
-                    }
-                }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .width((screenWidth * 0.60).dp)){
-                    Row(
-                        horizontalArrangement = Arrangement.Start,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .width((screenWidth * 0.40).dp)
-                    ){
-                        Text(
-                            text = "Ice:"
-                        )
-                    }
-                    Row(
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .width((screenWidth * 0.40).dp)
-                    ){
-                        Text(
-                            text = item.iceQuantity.toString(),
-                        )
-                    }
-                }
-
-
-                item.ingredients.forEach {
-                        ingredient ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier
-                            .width((screenWidth * 0.60).dp))
-                    {
-                        Row(
-                            horizontalArrangement = Arrangement.Start,
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .width((screenWidth * 0.40).dp)
-                        ){
-                            Text(
-                                text = "${ingredient.first}:"
-                            )
-                        }
-                        Row(
-                            horizontalArrangement = Arrangement.End,
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .width((screenWidth * 0.40).dp)
-                        ){
-                            Text(
-                                text = ingredient.second.toString(),
-                            )
-                        }
-                    }
-                }
-
-                Row(){
-                    Button(
-                        onClick = {
-                            /*val intent = Intent(currentActivity, EditDrinkActivity::class.java)
-                            intent.putExtra("drinkID", item.drinkID)
-                            currentActivity.startActivity(intent)*/
-
-                        },
-                        modifier = Modifier
-                            .padding(4.dp)
-                    ){
-                        Text(text = "Edit")
-                    }
-
-                    Button(
-                        onClick = {
-                            Basket.basketDrinks.removeAt(index)
-                            drinks.removeAt(index)
-                        },
-                        modifier = Modifier
-                            .padding(4.dp)
-                    ){
-                        Text(text = "Delete")
-                    }
-                }
-            }
-
-
+            )
         }
-
     }
 }
+
+@Composable
+fun BasketItemCard(
+    drink: Drink,
+    screenWidth: Int,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .padding(16.dp)
+            .width((screenWidth * 0.90).dp)
+            .border(2.dp, Color.Black)
+            .padding(24.dp)
+    ) {
+        Text(
+            text = drink.name,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+
+        drink.baseDrink?.let {
+            Text(text = "Base: $it", fontSize = 16.sp)
+        }
+
+        DrinkRow("Quantity", drink.quantity.toString(), screenWidth)
+        DrinkRow("Ice", drink.iceQuantity.toString(), screenWidth)
+
+        drink.ingredients.forEach { ingredient ->
+            DrinkRow(ingredient.first, ingredient.second.toString(), screenWidth)
+        }
+
+        ActionButtons(onEdit = onEdit, onDelete = onDelete)
+    }
+}
+
+@Composable
+fun DrinkRow(label: String, value: String, screenWidth: Int) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .padding(16.dp)
+            .width((screenWidth * 0.60).dp)
+    ) {
+        Text(
+            text = "$label:",
+            modifier = Modifier.width((screenWidth * 0.40).dp),
+            textAlign = TextAlign.Start
+        )
+        Text(
+            text = value,
+            modifier = Modifier.width((screenWidth * 0.40).dp),
+            textAlign = TextAlign.End
+        )
+    }
+}
+
+@Composable
+fun ActionButtons(onEdit: () -> Unit, onDelete: () -> Unit) {
+    Row {
+        Button(onClick = onEdit, modifier = Modifier.padding(4.dp)) {
+            Text(text = "Edit")
+        }
+        Button(onClick = onDelete, modifier = Modifier.padding(4.dp)) {
+            Text(text = "Delete")
+        }
+    }
+}
+

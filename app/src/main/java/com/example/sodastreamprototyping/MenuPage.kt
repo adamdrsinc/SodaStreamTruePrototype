@@ -20,12 +20,6 @@ fun MenuPage() {
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    /*val drinks = listOf(
-        Drink("Cherry Cream", "$5", "Soda, Cherry Syrup, Cream"),
-        Drink("Orange Vanilla", "$5", "Orange Soda, Vanilla Syrup"),
-        Drink("Creamy Cola Coconut", "$5", "Creamy Cola, Coconut Syrup")
-    )*/
-
     var ingList1 = arrayListOf<Pair<String, Int>>(
         Pair("Strawberry Cream", 1),
         Pair("Coconut", 1)
@@ -87,15 +81,6 @@ fun DrinkCard(drink: Drink) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(text = drink.price.toString(), fontSize = 16.sp, fontWeight = FontWeight.Medium)
                 Spacer(modifier = Modifier.height(4.dp))
-
-                /*var ingredientString: String = ""
-                for(i in 0 until drink.ingredients.size){
-                    ingredientString += if(i != drink.ingredients.size - 1){
-                        "${drink.ingredients[i]}, "
-                    }else{
-                        drink.ingredients[i]
-                    }
-                }*/
 
                 if(drink.description != null){
                     Text(text = drink.description!!, fontSize = 14.sp)

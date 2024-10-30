@@ -11,10 +11,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 
 @Composable
-fun Home() {
-    MainLayout { innerPadding ->
+fun Home(navController: NavController) {
+    MainLayout(navController = navController) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
