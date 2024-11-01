@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+
 android {
     namespace = "com.example.sodastreamprototyping"
     compileSdk = 34
@@ -62,4 +63,17 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // Volley
+    implementation ("com.android.volley:volley:1.2.1")
+
+    // Stripe
+    implementation ("com.stripe:stripe-android:20.1.0")
+    implementation ("com.github.kittinunf.fuel:fuel:2.3.1")
+    implementation ("com.github.kittinunf.fuel:fuel-json:2.3.1")
+
+    // Google Pay
+    implementation ("com.google.android.gms:play-services-wallet:18.1.3")
+
+
 }
