@@ -3,4 +3,30 @@
     <string name="title_activity_basket">BasketActivity</string>
     <string name="title_activity_edit_drink">EditDrinkActivity</string>
     <string name="title_activity_checkout">CheckoutActivity</string>
+    <string-array name="drink_bases">
+        <item>Cola</item>
+        <item>Dr. Pepper</item>
+        <item>Sprite</item>
+        <item>Mtn. Dew</item>
+    </string-array>
+    <string-array name="drink_flavors">
+        <item>Coconut</item>
+        <item>Vanilla</item>
+        <item>Strawberry</item>
+        <item>Cream</item>
+        <item>Pineapple</item>
+        <item>Raspberry</item>
+        <item>Cranberry</item>
+        <item>Lime</item>
+        <item>Cherry</item>
+        <item>Cinnamon</item>
+        <item>Pomegranate</item>
+        <item>Peach</item>
+        <item>Blackberry</item>
+        <item>Caramel</item>
+        <item>Orange</item>
+        <item>Watermelon</item>
+        <item>Mango</item>
+        <item>Passion Fruit</item>
+    </string-array>
 </resources>
