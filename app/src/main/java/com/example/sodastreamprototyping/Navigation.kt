@@ -44,5 +44,9 @@ fun Navigation()
             EditMenu(navController = navController, drinkIDString = entry.arguments?.getString("drinkID"))
         }
 
+        composable(route = Screen.Checkout.route){
+            Checkout(navController)
+        }
+
     }
 }

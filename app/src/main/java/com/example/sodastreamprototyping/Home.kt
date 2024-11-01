@@ -38,7 +38,7 @@ fun Home(navController: NavController) {
 
             when (selectedTabIndex) {
                 0 -> MenuPage()
-                1 -> MyDrinksPage()
+                1 -> MyDrinksPage(navController)
                 2 -> GenerateDrinksPage()
             }
         }
@@ -50,7 +50,3 @@ fun GenerateDrinksPage() {
     TODO("Not yet implemented")
 }
 
-@Composable
-fun MyDrinksPage() {
-    TODO("Not yet implemented")
-}
