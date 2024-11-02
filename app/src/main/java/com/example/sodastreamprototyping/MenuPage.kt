@@ -1,7 +1,5 @@
 package com.example.sodastreamprototyping
 
-import android.app.Activity
-import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*

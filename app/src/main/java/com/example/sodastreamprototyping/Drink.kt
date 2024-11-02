@@ -1,12 +1,14 @@
 package com.example.sodastreamprototyping
 
+import androidx.compose.runtime.snapshots.SnapshotStateList
+
 class Drink(
-    var ingredients: ArrayList<Pair<String, Int>>,
+    var ingredients: ArrayList<Pair<String, Int>> = ArrayList(),
     var name: String,
-    var price: Double,
-    var quantity: Int,
+    var price: Double = 0.00,
+    var quantity: Int = 1,
     var iceQuantity: Int = 0,
-    val isCustom: Boolean,
+    val isCustom: Boolean = false,
     var baseDrink: String? = null,
     var description: String? = null,
     var drinkID: Int? = null
@@ -22,6 +24,7 @@ class Drink(
     }
 
     private fun getIngredientPair(ingredientName: String): Pair<String, Int>?{
+
         for(i in 0 until ingredients.size){
             if(ingredients[i].first == ingredientName)
                 return ingredients[i]

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -38,14 +39,18 @@ fun MyDrinksPage(navController: NavController) {
     )
 
 
-    Column {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
         CreateDrinkButton(navController = navController)
+        Spacer(modifier = Modifier.height(16.dp))
 
         drinks.forEach { drink ->
             DrinkCard(drink)
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
+
 }
 
 @Composable

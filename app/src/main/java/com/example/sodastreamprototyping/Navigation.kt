@@ -16,7 +16,8 @@ fun Navigation()
         composable(route = Screen.SignIn.route) {
             SignInScreen(
                 onSignUpClick = { navController.navigate("sign_up") },
-                onSignInSuccess = { navController.navigate("home") }
+                onSignInSuccess = { navController.navigate("home") },
+                navController = navController
             )
         }
         composable(route = Screen.SignUp.route) {
@@ -46,6 +47,10 @@ fun Navigation()
 
         composable(route = Screen.Checkout.route){
             Checkout(navController)
+        }
+
+        composable(route = Screen.NewDrink.route){
+            NewDrinkPage(navController)
         }
 
     }
