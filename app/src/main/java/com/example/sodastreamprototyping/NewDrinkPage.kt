@@ -45,6 +45,10 @@ fun NewDrinkPage(navController: NavController) {
                 Spacer(modifier = Modifier.height(16.dp))
                 CurrentDrinkSummary(newDrink = newDrink, ingredientsState = ingredientsState)
             }
+            item{
+                Spacer(modifier = Modifier.height(16.dp))
+                AddToBasketButton(newDrink = newDrink)
+            }
         }
     }
 }
@@ -183,5 +187,17 @@ fun CurrentDrinkSummary(newDrink: Drink, ingredientsState: MutableState<ArrayLis
                 }
             }
         }
+    }
+}
+
+
+@Composable
+fun AddToBasketButton(newDrink: Drink) {
+    Button(
+        onClick = {
+            Basket.addDrink(newDrink)
+        }
+    ) {
+        Text(text = "Add to Basket")
     }
 }
