@@ -37,6 +37,7 @@ android {
     }
     buildFeatures {
         compose = true
+        mlModelBinding = true
     }
 }
 
@@ -75,5 +76,9 @@ dependencies {
     // Google Pay
     implementation ("com.google.android.gms:play-services-wallet:18.1.3")
 
+    // Tensorflow
+    implementation("org.tensorflow:tensorflow-lite:2.9.0")
+    implementation("org.tensorflow:tensorflow-lite-task-vision:0.3.1")
+    implementation("org.tensorflow:tensorflow-lite-gpu:2.9.0")
 
 }
