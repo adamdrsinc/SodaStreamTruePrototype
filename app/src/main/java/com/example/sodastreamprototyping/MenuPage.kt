@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -18,26 +19,26 @@ fun MenuPage() {
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    var ingList1 = arrayListOf<Pair<String, Int>>(
-        Pair("Strawberry Cream", 1),
-        Pair("Coconut", 1)
+    val context = LocalContext.current
+    val drinkBases = context.resources.getStringArray(R.array.drink_bases)
+    val drinkIngredients = context.resources.getStringArray(R.array.drink_flavors)
+
+    var ingList1 : SnapshotStateList<Pair<String, Int>> = mutableStateListOf(
+        Pair(drinkIngredients[0], 1),
+        Pair(drinkIngredients[1], 1)
+    )
+    var ingList2 : SnapshotStateList<Pair<String, Int>> = mutableStateListOf(
+        Pair(drinkIngredients[2], 1),
+        Pair(drinkIngredients[3], 1)
+    )
+    var ingList3 : SnapshotStateList<Pair<String, Int>> = mutableStateListOf(
+        Pair(drinkIngredients[4], 1),
+        Pair(drinkIngredients[5], 1)
     )
 
-    var ingList2 = arrayListOf<Pair<String, Int>>(
-        Pair("Creamer", 1),
-        Pair("Coconut", 1)
-    )
-
-    var ingList3 = arrayListOf<Pair<String, Int>>(
-        Pair("Strawberry Cream", 1),
-        Pair("Blueberry", 1)
-    )
-
-
-
-    var drink1 = Drink(ingList1, name = "Strawberry Coconut", price = 2.99, quantity = 1, isCustom = false)
-    var drink2 = Drink(ingList2, name = "Coco Creamer", price = 2.99, quantity = 1, isCustom = false, iceQuantity = 5)
-    var drink3 = Drink(ingList3, name = "Blueberry Cream", price = 2.99, quantity = 1, isCustom = false, iceQuantity = 3)
+    var drink1 = Drink(ingList1, name = "Strawberry Creamer", price = 2.99, quantity = 1, isCustom = false, baseDrink = drinkBases[0])
+    var drink2 = Drink(ingList2, name = "Something Something", price = 2.99, quantity = 1, isCustom = false, iceQuantity = 5, baseDrink = drinkBases[1])
+    var drink3 = Drink(ingList3, name = "Other Thing", price = 2.99, quantity = 1, isCustom = false, iceQuantity = 3, baseDrink = drinkBases[2])
 
     val drinks = listOf(
         drink1,

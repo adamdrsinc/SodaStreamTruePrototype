@@ -37,12 +37,12 @@ fun Navigation()
             route = Screen.Edit.route + "/{drinkID}",
             arguments = listOf(
                 navArgument("drinkID"){
-                    type = NavType.StringType
+                    type = NavType.IntType
                     nullable = false
                 }
             )){
             entry ->
-            EditMenu(navController = navController, drinkIDString = entry.arguments?.getString("drinkID"))
+            EditDrinkPage(navController = navController, drinkID = entry.arguments?.getInt("drinkID"))
         }
 
         composable(route = Screen.Checkout.route){
