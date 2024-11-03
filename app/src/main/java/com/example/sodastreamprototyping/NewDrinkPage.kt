@@ -13,89 +13,87 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import kotlin.toString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewDrinkPage(navController: NavController) {
     val context = LocalContext.current
-    val drinkFlavors = context.resources.getStringArray(R.array.drink_flavors)
-    val drinkBases = context.resources.getStringArray(R.array.drink_bases)
 
-    // Initialize the custom drink with reactive ingredients
-    val newDrink = remember { Drink(name = "Custom", isCustom = true, ingredients = mutableStateListOf<Pair<String, Int>>()) }
-    val ingredientsState = newDrink.ingredients
-    var drinkName by remember { mutableStateOf(newDrink.name) }
-    var selectedBase by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
+    val drink = remember { Drink(name = "Custom", isCustom = true, ingredients = mutableStateListOf<Pair<String, Int>>()) }
+    val drinkFlavors = context.resources.getStringArray(R.array.drink_flavors)
+
+    val ingredientsState = remember { drink.ingredients }
+    var drinkName by remember { mutableStateOf(drink.name) }
 
     MainLayout(navController = navController) { innerPadding ->
-        LazyColumn(
+        Column(
+            verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .padding(innerPadding)
-                .fillMaxWidth()
+                .fillMaxSize()
+                .padding(16.dp)
         ) {
-            item {
-                // Dropdown for base drink selection
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { expanded = !expanded }
-                ) {
-                    TextField(
-                        value = selectedBase,
-                        onValueChange = {},
-                        readOnly = true,
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                        colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        drinkBases.forEach { base ->
-                            DropdownMenuItem(
-                                text = { Text(base) },
-                                onClick = {
-                                    selectedBase = base
-                                    newDrink.baseDrink = base
-                                    expanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-            item {
-                AccordionSectionIngredientRow(title = "Flavors", items = drinkFlavors, newDrink = newDrink, ingredientsState = ingredientsState)
-            }
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-                CurrentDrinkSummary(newDrink = newDrink, ingredientsState = ingredientsState)
-            }
-            item {
-                TextField(
-                    value = drinkName,
-                    onValueChange = {
-                        drinkName = it
-                        newDrink.name = it
-                    },
-                    label = {
-                        Text("Drink Name")
-                    },
-                    maxLines = 1,
-                    modifier = Modifier
-                        .padding(16.dp)
-                )
-            }
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-                AddToBasketButton(newDrink = newDrink)
+            Text(
+                text = "New Drink",
+                fontSize = 24.sp,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            DropdownMenuDrinkBases(drink)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Accordion for ingredients
+            AccordionSectionIngredientRow(
+                title = "Ingredients",
+                items = drinkFlavors,
+                newDrink = drink,
+                ingredientsState = ingredientsState
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // TextField to change the drink name
+            TextField(
+                value = drinkName,
+                onValueChange = {
+                    drinkName = it
+                    drink.name = it
+                },
+                label = { Text("Drink Name") },
+                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Display current selections
+            CurrentDrinkSummary(newDrink = drink, ingredientsState = ingredientsState)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            IceQuantitySlider(drink)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Save button
+            Button(
+                onClick = {
+                    // Save changes to the drink
+                    Toast.makeText(context, "Drink updated.", Toast.LENGTH_SHORT).show()
+                    Basket.addDrink(drink)
+                    navController.popBackStack()
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Save Changes")
             }
         }
     }
@@ -135,39 +133,6 @@ fun AccordionSectionIngredientRow(title: String, items: Array<String>, newDrink:
 }
 
 @Composable
-fun AccordionSectionBaseRow(title: String, items: Array<String>, newDrink: Drink, ingredientsState: SnapshotStateList<Pair<String, Int>>) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-    ) {
-        Text(
-            text = title,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { expanded = !expanded }
-                .padding(vertical = 8.dp)
-        )
-
-        AnimatedVisibility(
-            visible = expanded,
-            enter = expandVertically(),
-            exit = shrinkVertically()
-        ) {
-            Column {
-                items.forEach { item ->
-                    BaseRow(newDrink = newDrink, base = item, ingredientsState = ingredientsState)
-                }
-            }
-        }
-    }
-}
-
-@Composable
 fun IngredientRow(newDrink: Drink, ingredient: String, ingredientsState: SnapshotStateList<Pair<String, Int>>) {
     val context = LocalContext.current
 
@@ -194,26 +159,6 @@ fun IngredientRow(newDrink: Drink, ingredient: String, ingredientsState: Snapsho
         )
     }
 }
-
-@Composable
-fun BaseRow(newDrink: Drink, base: String, ingredientsState: SnapshotStateList<Pair<String,Int>>){
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable {
-                newDrink.baseDrink = base
-            }
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = base,
-            fontSize = 16.sp,
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
-
 
 @Composable
 fun CurrentDrinkSummary(newDrink: Drink, ingredientsState: SnapshotStateList<Pair<String, Int>>) {
@@ -296,20 +241,6 @@ fun CurrentDrinkSummary(newDrink: Drink, ingredientsState: SnapshotStateList<Pai
     }
 }
 
-@Composable
-fun AddToBasketButton(newDrink: Drink) {
-    val context = LocalContext.current
-    Button(
-        onClick = {
-            Basket.addDrink(newDrink)
-            Toast.makeText(context, "Drink added to basket.", Toast.LENGTH_SHORT).show()
-        }
-    ) {
-        Text(text = "Add to Basket")
-    }
-}
-
-
 fun incrementIngredient(
     newDrink: Drink,
     ingredient: String,
@@ -319,19 +250,12 @@ fun incrementIngredient(
 
     if (newDrink.hasIngredient(ingredient) != null) {
         if (newDrink.incrementIngredient(ingredient)) {
-            /*if (existingIngredient != null) {
-                val index = ingredientsState.indexOf(existingIngredient)
-                ingredientsState[index] = existingIngredient.copy(second = existingIngredient.second + 1)
-            } else {
-                ingredientsState.add(Pair(ingredient, 1))
-            }*/
             return true
         } else {
             return false
         }
     } else {
         if (newDrink.addIngredient(ingredient)) {
-            //ingredientsState.add(Pair(ingredient, 1))
             return true
         } else {
             return false
@@ -348,15 +272,6 @@ fun decrementIngredient(
 
     if (newDrink.hasIngredient(ingredient) != null) {
         if (newDrink.decrementIngredient(ingredient)) {
-            /*if (existingIngredient != null) {
-                val index = ingredientsState.indexOf(existingIngredient)
-                val newQuantity = existingIngredient.second - 1
-                if (newQuantity > 0) {
-                    ingredientsState[index] = existingIngredient.copy(second = newQuantity)
-                } else {
-                    ingredientsState.removeAt(index)
-                }
-            }*/
             return true
         } else {
             return false

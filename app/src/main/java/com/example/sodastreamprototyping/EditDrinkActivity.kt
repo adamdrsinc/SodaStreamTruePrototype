@@ -12,6 +12,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
 import android.widget.Toast
+import kotlin.collections.addAll
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,6 +36,11 @@ fun EditDrinkPage(navController: NavController, drinkID: Int?) {
     var selectedBase by remember { mutableStateOf(drink?.baseDrink ?: "") }
     var expanded by remember { mutableStateOf(false) }
 
+    // LaunchedEffect to observe changes in ingredientsState
+    LaunchedEffect(ingredientsState) {
+        // Trigger recomposition when ingredientsState changes
+    }
+
     MainLayout(navController = navController) { innerPadding ->
         Column(
             verticalArrangement = Arrangement.Top,
@@ -50,8 +56,7 @@ fun EditDrinkPage(navController: NavController, drinkID: Int?) {
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-
-            DropdownMenuDrinkBases(drinkID)
+            DropdownMenuDrinkBases(drink)
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -70,7 +75,7 @@ fun EditDrinkPage(navController: NavController, drinkID: Int?) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            IceQuantitySlider(drinkID)
+            IceQuantitySlider(drink)
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -90,15 +95,13 @@ fun EditDrinkPage(navController: NavController, drinkID: Int?) {
 }
 
 @Composable
-fun IceQuantitySlider(drinkID: Int?) {
+fun IceQuantitySlider(drink: Drink?) {
     val config = LocalConfiguration.current
     val screenWidth = config.screenWidthDp
 
-    val drink = Basket.getDrinks().find {
-        it.drinkID == drinkID
-    }
-    if(drink == null)
+    if(drink == null){
         return
+    }
 
     // State to hold the slider position
     val sliderPosition = remember { mutableStateOf(drink.iceQuantity.toFloat()) } // 0f to 1f range
@@ -127,7 +130,7 @@ fun IceQuantitySlider(drinkID: Int?) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DropdownMenuDrinkBases(drinkID: Int?){
+fun DropdownMenuDrinkBases(drink: Drink?){
     val context = LocalContext.current
 
     var isExpanded = remember{
@@ -140,27 +143,12 @@ fun DropdownMenuDrinkBases(drinkID: Int?){
         mutableIntStateOf(0)
     }
 
-    /*var theDrink: Drink? = null
-    for(i in 0 until Basket.getDrinks().size){
-        if(Basket.getDrinks()[i].drinkID == drinkID){
-            theDrink = Basket.getDrinks()[i]
-            break
-        }
-    }*/
-
-    var theDrink = Basket.getDrinks().find { it.drinkID == drinkID }
-
     val drinkBases = context.resources.getStringArray(R.array.drink_bases)
 
-    /*var drinkIndex: Int = 0
-    for(i in 0 until drinkBases.size){
-        if(theDrink?.baseDrink == TEMP_DRINK_INGREDIENTS[i]){
-            drinkIndex = i
-            break
-        }
-    }*/
-
-    var drinkIndex = drinkBases.indexOf(theDrink?.baseDrink)
+    var drinkIndex = drinkBases.indexOf(drink?.baseDrink)
+    if(drinkIndex == -1){
+        return
+    }
 
     selectedOptionIndex.intValue = drinkIndex
 
@@ -195,11 +183,9 @@ fun DropdownMenuDrinkBases(drinkID: Int?){
                         selectedOptionIndex.value = index
                         isExpanded.value = false
 
-                        for(i in 0 until Basket.getDrinks().size){
-                            if(Basket.getDrinks()[i].drinkID == drinkID){
-                                Basket.getDrinks()[i].baseDrink = baseName
-                                break
-                            }
+                        val drink = Basket.getDrinks().find { it.drinkID == drink?.drinkID }
+                        if(drink != null){
+                            drink.baseDrink = baseName
                         }
                     }
                 )

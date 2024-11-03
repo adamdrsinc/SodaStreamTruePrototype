@@ -24,6 +24,8 @@ data class Drink(
         for (drinkIngredient in ingredients) {
             currentPumpCount += drinkIngredient.second
         }
+
+        drinkID = Basket.getNextDrinkID()
     }
 
     fun hasIngredient(ingredient: String): Pair<String, Int>? {

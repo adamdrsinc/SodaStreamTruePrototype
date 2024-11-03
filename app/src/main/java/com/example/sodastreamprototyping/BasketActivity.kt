@@ -140,7 +140,7 @@ fun BasketItemCard(
             DrinkRow(ingredient.first, ingredient.second.toString(), screenWidth)
         }
 
-        ActionButtons(onEdit = onEdit, onDelete = onDelete)
+        ActionButtons(isCustom = drink.isCustom, onEdit = onEdit, onDelete = onDelete)
     }
 }
 
@@ -166,11 +166,14 @@ fun DrinkRow(label: String, value: String, screenWidth: Int) {
 }
 
 @Composable
-fun ActionButtons(onEdit: () -> Unit, onDelete: () -> Unit) {
+fun ActionButtons(isCustom: Boolean, onEdit: () -> Unit, onDelete: () -> Unit) {
     Row {
-        Button(onClick = onEdit, modifier = Modifier.padding(4.dp)) {
-            Text(text = "Edit")
+        if(isCustom){
+            Button(onClick = onEdit, modifier = Modifier.padding(4.dp)) {
+                Text(text = "Edit")
+            }
         }
+
         Button(onClick = onDelete, modifier = Modifier.padding(4.dp)) {
             Text(text = "Delete")
         }
