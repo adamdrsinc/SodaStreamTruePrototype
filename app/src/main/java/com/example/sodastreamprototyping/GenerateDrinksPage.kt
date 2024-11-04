@@ -1,5 +1,6 @@
 package com.example.sodastreamprototyping
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -11,11 +12,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.sodastreamprototyping.viewModel.GenerateDrinksViewModel
 
 
 @Composable
-fun GenerateDrinksPage() {
 
+fun GenerateDrinksPage() {
+    val viewModel : GenerateDrinksViewModel = hiltViewModel()
+    Log.d("drink", viewModel.makeRandDrink().getUsedFlavors().toString())
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 150.dp),
         Modifier.padding(10.dp)

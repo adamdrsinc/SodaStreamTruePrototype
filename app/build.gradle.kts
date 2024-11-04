@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 
@@ -77,8 +79,18 @@ dependencies {
     implementation ("com.google.android.gms:play-services-wallet:18.1.3")
 
     // Tensorflow
-    implementation("org.tensorflow:tensorflow-lite:2.9.0")
-    implementation("org.tensorflow:tensorflow-lite-task-vision:0.3.1")
-    implementation("org.tensorflow:tensorflow-lite-gpu:2.9.0")
+    implementation(libs.tensorflow.lite)
+    implementation(libs.tensorflow.lite.task.vision)
+    implementation(libs.tensorflow.lite.gpu)
 
+    //hilt
+    implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.navigation.compose)
+    kapt(libs.hilt.android.compiler)
 }
+
+kapt {
+    correctErrorTypes = true
+}
+
+

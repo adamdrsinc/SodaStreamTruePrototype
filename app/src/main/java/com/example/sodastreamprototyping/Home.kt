@@ -45,11 +45,6 @@ fun Home() {
 }
 
 @Composable
-fun GenerateDrinksPage() {
-    TODO("Not yet implemented")
-}
-
-@Composable
 fun MyDrinksPage() {
     TODO("Not yet implemented")
 }
