@@ -16,12 +16,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
-                MainScreen()
+                Navigation()
             }
         }
     }
 }
 
+/*
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
@@ -43,4 +44,4 @@ fun MainScreen() {
         }
 
     }
-}
+}*/

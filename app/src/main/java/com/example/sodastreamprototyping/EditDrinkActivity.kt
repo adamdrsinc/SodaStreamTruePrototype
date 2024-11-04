@@ -1,12 +1,296 @@
 package com.example.sodastreamprototyping
-
-import android.app.Activity
-import android.content.Intent
-import android.os.Bundle
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalConfiguration
 import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
+import kotlin.collections.addAll
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditDrinkPage(navController: NavController, drinkID: Int?) {
+    val context = LocalContext.current
+    val config = LocalConfiguration.current
+    val screenWidth = config.screenWidthDp
+    val screenHeight = config.screenHeightDp
+
+    val drink = Basket.getDrinks().find { it.drinkID == drinkID }
+    val drinkFlavors = context.resources.getStringArray(R.array.drink_flavors)
+    val drinkBases = context.resources.getStringArray(R.array.drink_bases)
+
+    val ingredientsState = remember {
+        mutableStateListOf<Pair<String, Int>>().apply {
+            drink?.ingredients?.let {
+                addAll(it)
+            }
+        }
+    }
+    var selectedBase by remember { mutableStateOf(drink?.baseDrink ?: "") }
+    var expanded by remember { mutableStateOf(false) }
+
+    // LaunchedEffect to observe changes in ingredientsState
+    LaunchedEffect(ingredientsState) {
+        // Trigger recomposition when ingredientsState changes
+    }
+
+    MainLayout(navController = navController) { innerPadding ->
+        Column(
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "Edit Drink",
+                fontSize = 24.sp,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            DropdownMenuDrinkBases(drink)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Accordion for ingredients
+            AccordionSectionIngredientRow(
+                title = "Ingredients",
+                items = drinkFlavors,
+                newDrink = drink!!,
+                ingredientsState = ingredientsState
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Display current selections
+            CurrentDrinkSummary(newDrink = drink, ingredientsState = ingredientsState)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            IceQuantitySlider(drink)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Save button
+            Button(
+                onClick = {
+                    // Save changes to the drink
+                    Toast.makeText(context, "Drink updated.", Toast.LENGTH_SHORT).show()
+                    navController.popBackStack()
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Save Changes")
+            }
+        }
+    }
+}
+
+@Composable
+fun IceQuantitySlider(drink: Drink?) {
+    val config = LocalConfiguration.current
+    val screenWidth = config.screenWidthDp
+
+    if(drink == null){
+        return
+    }
+
+    // State to hold the slider position
+    val sliderPosition = remember { mutableStateOf(drink.iceQuantity.toFloat()) } // 0f to 1f range
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .width((screenWidth * 0.80).dp)
+            .padding(16.dp)
+    ) {
+        // Text to display the current value of the slider
+        Text(text = "Slider value: ${sliderPosition.value.toInt()}")
+
+        // Slider
+        Slider(
+            value = sliderPosition.value,
+            onValueChange = { newValue ->
+                sliderPosition.value = newValue
+                drink.iceQuantity = newValue.toInt()
+            },
+            valueRange = 0f..5f // Range of the slider
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DropdownMenuDrinkBases(drink: Drink?){
+    val context = LocalContext.current
+
+    var isExpanded = remember{
+        mutableStateOf(false)
+    }
+    var selectedText = remember{
+        mutableStateOf("")
+    }
+    var selectedOptionIndex = remember{
+        mutableIntStateOf(0)
+    }
+
+    val drinkBases = context.resources.getStringArray(R.array.drink_bases)
+
+    var drinkIndex = drinkBases.indexOf(drink?.baseDrink)
+    if(drinkIndex == -1){
+        return
+    }
+
+    selectedOptionIndex.intValue = drinkIndex
+
+    ExposedDropdownMenuBox(
+        expanded = isExpanded.value,
+        onExpandedChange = {isExpanded.value = !isExpanded.value},
+    ) {
+        TextField(
+            value = drinkBases[selectedOptionIndex.intValue],
+            onValueChange = {},
+            readOnly = true,
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded.value)
+            },
+            colors = ExposedDropdownMenuDefaults.textFieldColors(),
+            modifier = Modifier
+                .menuAnchor()
+        )
+
+        ExposedDropdownMenu(
+            expanded = isExpanded.value,
+            onDismissRequest = {isExpanded.value = false},
+        ) {
+            drinkBases.forEachIndexed {
+                    index, baseName ->
+                DropdownMenuItem(
+                    text = {
+                        Text(text = baseName)
+                    },
+                    onClick = {
+                        selectedText.value = baseName
+                        selectedOptionIndex.value = index
+                        isExpanded.value = false
+
+                        val drink = Basket.getDrinks().find { it.drinkID == drink?.drinkID }
+                        if(drink != null){
+                            drink.baseDrink = baseName
+                        }
+                    }
+                )
+            }
+        }
+    }
+
+
+}
+/*    val context = LocalContext.current
+    val config = LocalConfiguration.current
+    val screenWidth = config.screenWidthDp
+    val screenHeight = config.screenHeightDp
+
+    val drink = Basket.getDrinks().find { it.drinkID == drinkID }
+    val drinkFlavors = context.resources.getStringArray(R.array.drink_flavors)
+    val drinkBases = context.resources.getStringArray(R.array.drink_bases)
+
+    val ingredientsState = remember { mutableStateListOf<Pair<String, Int>>().apply { drink?.ingredients?.let { addAll(it) } } }
+    var selectedBase by remember { mutableStateOf(drink?.baseDrink ?: "") }
+    var expanded by remember { mutableStateOf(false) }
+
+    MainLayout(navController = navController) { innerPadding ->
+        Column(
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "Edit Drink",
+                fontSize = 24.sp,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            // Dropdown for base drink selection
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded }
+            ) {
+                TextField(
+                    value = selectedBase,
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                    colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    drinkBases.forEach { base ->
+                        DropdownMenuItem(
+                            text = { Text(base) },
+                            onClick = {
+                                selectedBase = base
+                                drink?.baseDrink = base
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Accordion for ingredients
+            AccordionSectionIngredientRow(
+                title = "Ingredients",
+                items = drinkFlavors,
+                newDrink = drink!!,
+                ingredientsState = ingredientsState
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Display current selections
+            CurrentDrinkSummary(newDrink = drink, ingredientsState = ingredientsState)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Save button
+            Button(
+                onClick = {
+                    // Save changes to the drink
+                    Toast.makeText(context, "Drink updated.", Toast.LENGTH_SHORT).show()
+                    navController.popBackStack()
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Save Changes")
+            }
+        }
+    }
+}
+*/
+
+
+/*
+package com.example.sodastreamprototyping
+
+import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,9 +304,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -37,48 +319,24 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.compose.rememberNavController
-import com.example.sodastreamprototyping.ui.theme.SodaStreamPrototypingTheme
+import androidx.navigation.NavController
 
-class EditDrinkActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        val drinkID = intent.getIntExtra("drinkID", -1)
-
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            SodaStreamPrototypingTheme() {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ){
-                    EditMenu(drinkID = drinkID)
-                }
-            }
-        }
-    }
-}
-
-/*
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    SodaStreamProtoTheme {
-    }
-}
-*/
 
 @Composable
-fun EditMenu(drinkID: Int){
-    val drink = Basket.getDrinks().find {
-        it.drinkID == drinkID
-    }
+fun EditMenu(navController: NavController, drinkIDString: String?) {
+    val context = LocalContext.current
     val config = LocalConfiguration.current
     val screenWidth = config.screenWidthDp
     val screenHeight = config.screenHeightDp
 
+    var drinkID = drinkIDString?.toInt()
+    val drink = Basket.getDrinks().find { it.drinkID == drinkID }
+    val drinkFlavors = context.resources.getStringArray(R.array.drink_flavors)
+    val drinkBases = context.resources.getStringArray(R.array.drink_bases)
 
-    MainLayout { innerPadding ->
+    val ingredientsState = remember { mutableStateListOf<Pair<String, Int>>().apply { drink?.ingredients?.let { addAll(it) } } }
+
+    MainLayout(navController = navController) { innerPadding ->
         Column(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -86,13 +344,11 @@ fun EditMenu(drinkID: Int){
                 .padding(innerPadding)
                 .fillMaxSize()
                 .height((screenHeight * 0.80).dp)
-                .width((screenWidth * 0.80).dp))
-
-        {
-
+                .width((screenWidth * 0.80).dp)
+        ) {
             TitleText(drink!!.name)
 
-            if(drink.isCustom){
+            if (drink.isCustom) {
                 CustomDrinkDropdown(drinkID)
             }
 
@@ -100,28 +356,47 @@ fun EditMenu(drinkID: Int){
                 modifier = Modifier
                     .border(2.dp, Color.Black)
                     .padding(24.dp)
-            ){
+            ) {
+                TitleText("Bases")
+                AccordionSectionBaseRow(title = "Bases", items = drinkBases, newDrink = drink, ingredientsState = ingredientsState)
+            }
+
+            Column(
+                modifier = Modifier
+                    .border(2.dp, Color.Black)
+                    .padding(24.dp)
+            ) {
+                TitleText("Flavors")
+                AccordionSectionIngredientRow(title = "Flavors", items = drinkFlavors, newDrink = drink, ingredientsState = ingredientsState)
+            }
+
+            Column(
+                modifier = Modifier
+                    .border(2.dp, Color.Black)
+                    .padding(24.dp)
+            ) {
                 TitleText("Syrups")
                 ShowSyrupsList(drinkID)
             }
 
             Column(
                 modifier = Modifier
-                .border(2.dp, Color.Black)
-                .padding(24.dp)
-            ){
+                    .border(2.dp, Color.Black)
+                    .padding(24.dp)
+            ) {
                 TitleText("Ice")
                 IceQuantitySlider(drinkID)
             }
 
-            EditDrinkBackButton()
+            EditDrinkBackButton(navController = navController)
         }
     }
-
 }
 
+
+
 @Composable
-fun ShowSyrupsList(drinkID: Int) {
+fun ShowSyrupsList(drinkID: Int?) {
     val context = LocalContext.current
     val config = LocalConfiguration.current
     val screenWidth = config.screenWidthDp
@@ -195,7 +470,7 @@ fun ShowSyrupsList(drinkID: Int) {
                     // Increment button
                     Button(
                         onClick = {
-                            if (currentDrink?.incrementIngredient(ingredientPair.first) == true) {
+                            if (currentDrink?.incrementIngredient(ingredientPair.first)  == true) {
                                 // Update the count
                                 ingredientCounts[index] = ingredientPair.copy(second = ingredientPair.second + 1)
                             } else {
@@ -214,7 +489,7 @@ fun ShowSyrupsList(drinkID: Int) {
 
 
 @Composable
-fun IceQuantitySlider(drinkID: Int) {
+fun IceQuantitySlider(drinkID: Int?) {
     val config = LocalConfiguration.current
     val screenWidth = config.screenWidthDp
 
@@ -262,16 +537,10 @@ fun TitleText(text: String){
 }
 
 @Composable
-fun EditDrinkBackButton(){
-    val context = LocalContext.current
-    val navController = rememberNavController()
-
+fun EditDrinkBackButton(navController: NavController){
     Button(
         onClick = {
             navController.popBackStack()
-            /*val currentActivity = context as Activity
-            val intent = Intent(currentActivity, com.example.sodastreamprototyping.BasketActivity::class.java)
-            currentActivity.startActivity(intent)*/
         },
         modifier = Modifier
             .padding(16.dp)
@@ -286,7 +555,7 @@ fun EditDrinkBackButton(){
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CustomDrinkDropdown(drinkID: Int){
+fun CustomDrinkDropdown(drinkID: Int?){
     var isExpanded = remember{
         mutableStateOf(false)
     }
@@ -375,4 +644,4 @@ fun DisplayDrinkID(drinkID: Int){
     Text(
         text = if(drinkID != -1) "Drink ID: $drinkID" else "Drink not valid"
     )
-}
+}*/

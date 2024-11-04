@@ -5,19 +5,29 @@ class Basket {
         val basketDrinks : ArrayList<Drink> = arrayListOf()
 
         fun addDrink(drink: Drink){
-            var alreadyDrink = basketDrinks.find{
+            var drinkExists = basketDrinks.find{
                 it.name == drink.name
             }
 
-            if(alreadyDrink == null){
+            if(drinkExists == null){
+                drink.drinkID = getNextDrinkID()
                 basketDrinks.add(drink)
             }else{
-                alreadyDrink.quantity += 1
+                drinkExists.quantity++
             }
         }
 
         fun getDrinks(): ArrayList<Drink>{
             return basketDrinks
+        }
+
+        fun getNextDrinkID(): Int{
+            var id = 0
+            basketDrinks.forEach {
+                id++
+            }
+
+            return id + 1
         }
     }
 }

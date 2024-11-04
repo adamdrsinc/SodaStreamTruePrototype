@@ -11,6 +11,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.practice.ApiRequestHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,7 +20,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun SignInScreen(
     onSignUpClick: () -> Unit,
-    onSignInSuccess: () -> Unit
+    onSignInSuccess: () -> Unit,
+    navController: NavController
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -74,7 +76,7 @@ fun SignInScreen(
 
         Button(
             onClick = {
-                if (username.isEmpty() || password.isEmpty()) {
+                /*if (username.isEmpty() || password.isEmpty()) {
                     errorMessage = "Please fill out all fields"
                 } else {
                     errorMessage = null
@@ -96,7 +98,9 @@ fun SignInScreen(
                             }
                         )
                     }
-                }
+                }*/
+                navController.navigate(Screen.Home.route)
+
             },
             modifier = Modifier.fillMaxWidth()
         ) {

@@ -22,18 +22,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainLayout(
+    navController: NavController,
     content: @Composable (PaddingValues) -> Unit
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-
-    val context = LocalContext.current
-
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -104,9 +103,8 @@ fun MainLayout(
                             Icon(Icons.Default.History, contentDescription = "Order History")
                         }
                         IconButton(onClick = {
-                            val activity = context as Activity
-                            val intent = Intent(activity, BasketActivity::class.java)
-                            activity.startActivity(intent)
+                            navController.navigate(Screen.Basket.route)
+
                         }) {
                             Icon(Icons.Default.ShoppingCart, contentDescription = "Cart")
                         }
