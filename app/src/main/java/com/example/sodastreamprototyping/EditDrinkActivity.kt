@@ -12,7 +12,6 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
 import android.widget.Toast
-import kotlin.collections.addAll
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -183,10 +182,7 @@ fun DropdownMenuDrinkBases(drink: Drink?){
                         selectedOptionIndex.value = index
                         isExpanded.value = false
 
-                        val drink = Basket.getDrinks().find { it.drinkID == drink?.drinkID }
-                        if(drink != null){
-                            drink.baseDrink = baseName
-                        }
+                        drink?.baseDrink = baseName
                     }
                 )
             }
