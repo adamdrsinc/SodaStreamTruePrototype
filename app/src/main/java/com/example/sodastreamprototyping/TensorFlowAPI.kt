@@ -31,8 +31,10 @@ class TensorFlowAPI @Inject constructor(@ApplicationContext context: Context){
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
     }
 
-    // soda represents an integer index of the base soda
-    // flavors is an array with length of 18 that represents the concentration of each flavor in the drink
+    /**
+     * Takes in a int representing the index of the [soda] base and an array of integers representing the quantity of
+     * each available flavor. Outputs an array with the indexes of only chosen flavors.
+     */
     fun generateDrink(soda : Int, flavors: IntArray) : List<Int> {
         val baseInput = FloatArray(baseSize){index ->
             if(index == soda) pumpSize else 0f
