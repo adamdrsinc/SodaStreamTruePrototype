@@ -45,9 +45,9 @@ fun Navigation()
             EditDrinkPage(navController = navController, drinkID = entry.arguments?.getInt("drinkID"))
         }
 
-        composable(route = Screen.Checkout.route){
-            Checkout(navController)
-        }
+        /*composable(route = Screen.Checkout.route){
+            CheckoutScreen()
+        }*/
 
         composable(route = Screen.NewDrink.route){
             NewDrinkPage(navController)

@@ -29,11 +29,9 @@ class ApiRequestHelper {
             val jsonObjectRequest = JsonObjectRequest(
                 Request.Method.POST, url, jsonParams,
                 Response.Listener { response ->
-                    // Handle successful response
                     onSuccess(response)
                 },
                 Response.ErrorListener { error ->
-                    // Handle error response
                     Log.e("API_ERROR", error.toString())
                     onError(error.message ?: "An error occurred")
                 }
@@ -89,7 +87,42 @@ class ApiRequestHelper {
             }
 
 
+
             // Add the request to the RequestQueue
+            val requestQueue: RequestQueue = Volley.newRequestQueue(context)
+            requestQueue.add(jsonObjectRequest)
+        }
+
+        fun fetchPaymentIntent(
+            context: Context,
+            amount: Double,
+            currency: String,
+            onSuccess: (String) -> Unit,
+            onError: (String) -> Unit
+        ) {
+            val url = "$BASE_URL/payments/create-payment-intent"
+            val jsonParams = JSONObject().apply {
+                put("amount", (amount * 100).toInt()) // Convert dollars to cents
+                put("currency", currency)
+            }
+
+            val jsonObjectRequest = JsonObjectRequest(
+                Request.Method.POST, url, jsonParams,
+                { response ->
+                    try {
+                        val clientSecret = response.getString("clientSecret")
+                        onSuccess(clientSecret)
+                    } catch (e: Exception) {
+                        Log.e("API_ERROR", e.toString())
+                        onError("Failed to parse client secret")
+                    }
+                },
+                { error ->
+                    Log.e("API_ERROR", error.toString())
+                    onError(error.message ?: "An error occurred")
+                }
+            )
+
             val requestQueue: RequestQueue = Volley.newRequestQueue(context)
             requestQueue.add(jsonObjectRequest)
         }
