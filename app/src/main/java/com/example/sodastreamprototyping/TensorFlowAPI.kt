@@ -11,9 +11,9 @@ import javax.inject.Singleton
 
 @Singleton
 class TensorFlowAPI @Inject constructor(@ApplicationContext context: Context){
-    public val baseSize = 4
-    public val flavorSize = 18
-    public val endDrinkIndex = flavorSize
+    val baseSize = context.resources.getStringArray(R.array.drink_bases).size
+    val flavorSize = context.resources.getStringArray(R.array.drink_flavors).size
+    val endDrinkIndex = flavorSize
 
     private val pumpSize = (1.0f/3.0f) //what value represents a single pump
     private val interpreter: Interpreter
