@@ -80,7 +80,7 @@ fun SignInScreen(
                 * TODO: Uncomment this to implement login functionality. Remove the line below
                 *  (navController.navigate(Screen.Home.route))
                 * */
-                /*if (username.isEmpty() || password.isEmpty()) {
+                if (username.isEmpty() || password.isEmpty()) {
                     errorMessage = "Please fill out all fields"
                 } else {
                     errorMessage = null
@@ -102,8 +102,8 @@ fun SignInScreen(
                             }
                         )
                     }
-                }*/
-                navController.navigate(Screen.Home.route)
+                }
+                //navController.navigate(Screen.Home.route)
 
             },
             modifier = Modifier.fillMaxWidth()
