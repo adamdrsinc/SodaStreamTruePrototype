@@ -49,9 +49,9 @@ fun Navigation()
             CheckoutScreen()
         }*/
 
-        composable(route = Screen.NewDrink.route){
+        /*composable(route = Screen.NewDrink.route){
             NewDrinkPage(navController)
         }
-
+*/
     }
 }

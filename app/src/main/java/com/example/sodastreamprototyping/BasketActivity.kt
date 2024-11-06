@@ -31,7 +31,6 @@ import androidx.navigation.NavController
 @Composable
 fun ShoppingBasket(navController: NavController, modifier: Modifier = Modifier){
     val config = LocalConfiguration.current
-    val screenHeight = config.screenHeightDp
 
     MainLayout(navController = navController) {innerPadding ->
         Column(
@@ -154,10 +153,8 @@ fun DrinkRow(label: String, value: String, screenWidth: Int) {
 @Composable
 fun ActionButtons(isCustom: Boolean, onEdit: () -> Unit, onDelete: () -> Unit) {
     Row {
-        if(isCustom){
-            Button(onClick = onEdit, modifier = Modifier.padding(4.dp)) {
-                Text(text = "Edit")
-            }
+        Button(onClick = onEdit, modifier = Modifier.padding(4.dp)) {
+            Text(text = "Edit")
         }
 
         Button(onClick = onDelete, modifier = Modifier.padding(4.dp)) {
