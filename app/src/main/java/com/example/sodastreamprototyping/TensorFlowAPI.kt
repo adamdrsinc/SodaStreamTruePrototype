@@ -1,14 +1,21 @@
 package com.example.sodastreamprototyping
 
 import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 import org.tensorflow.lite.Interpreter
-import java.nio.ByteBuffer
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 import java.io.FileInputStream
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class DrinkGenerator(context: Context){
+@Singleton
+class TensorFlowAPI @Inject constructor(@ApplicationContext context: Context){
+    val baseSize = context.resources.getStringArray(R.array.drink_bases).size
+    val flavorSize = context.resources.getStringArray(R.array.drink_flavors).size
+    val endDrinkIndex = flavorSize
 
+    private val pumpSize = (1.0f/3.0f) //what value represents a single pump
     private val interpreter: Interpreter
 
     init {
@@ -24,34 +31,23 @@ class DrinkGenerator(context: Context){
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
     }
 
-    // soda represents an integer index of the base soda
-    // flavors is an array with length of 18 that represents the concentration of each flavor in the drink
-    fun generateDrink(soda : Int, flavors: FloatArray) : List<String> {
-
-        // allocates 1 byte for each soda type and 4 bytes for each flavor
-        // might be an issue if sodas should not be expressed as 1
-        val inputBuffer = ByteBuffer.allocateDirect(4 + flavors.size * 4).apply {
-            putInt(soda) // makes soda index 1
-            flavors.forEach { putFloat(it) } // adds each flavor index
+    /**
+     * Takes in a int representing the index of the [soda] base and an array of integers representing the quantity of
+     * each available flavor. Outputs an array with the indexes of only chosen flavors.
+     */
+    fun generateDrink(soda : Int, flavors: IntArray) : List<Int> {
+        val baseInput = FloatArray(baseSize){index ->
+            if(index == soda) pumpSize else 0f
         }
+        val flavorInput = flavors.map { it.toFloat() * pumpSize}.toFloatArray()
 
-        // 4 bytes for each flavor + finish drink
-        val outputBuffer = ByteBuffer.allocateDirect(4 * 19)
+        val inputArray = baseInput + flavorInput
+        val outputArray = Array(1) {FloatArray(flavorSize + 1)} //tensorflow outputs output in 2d array
 
-        interpreter.run(inputBuffer, outputBuffer)
+        interpreter.run(inputArray, outputArray)
 
-        outputBuffer.rewind()
-        val allIngredients = arrayOf("Coconut", "Vanilla", "Strawberry", "Cream", "Pineapple", "Raspberry", "Cranberry", "lime", "Cherry", "Cinnamon", "Pomegranate", "Peach", "Blackberry", "Caramel", "Orange", "Watermelon", "Mango", "Passion Fruit")
-        val newIngredients = mutableListOf<String>()
+        return outputArray[0].withIndex().filter { it.value > 0.5 }.map { it.index}
 
-        for (i in 0 until 19) {
-            val score = outputBuffer.float
-            if (score > 0.4) { // what score should be the threshold?
-                newIngredients.add(allIngredients[i])
-            }
-        }
-
-        return newIngredients
     }
 
 }
