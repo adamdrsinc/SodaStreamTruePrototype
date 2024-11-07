@@ -76,7 +76,7 @@ fun SignInScreen(
 
         Button(
             onClick = {
-                /*if (username.isEmpty() || password.isEmpty()) {
+                if (username.isEmpty() || password.isEmpty()) {
                     errorMessage = "Please fill out all fields"
                 } else {
                     errorMessage = null
@@ -88,6 +88,7 @@ fun SignInScreen(
                             onSuccess = { response ->
                                 CoroutineScope(Dispatchers.Main).launch {
                                     Log.d("LOGIN_SUCCESS", response.toString())
+                                    UserPreferences.setLoggedIn(context, true)
                                     onSignInSuccess()
                                 }
                             },
@@ -98,8 +99,7 @@ fun SignInScreen(
                             }
                         )
                     }
-                }*/
-                navController.navigate(Screen.Home.route)
+                }
 
             },
             modifier = Modifier.fillMaxWidth()
