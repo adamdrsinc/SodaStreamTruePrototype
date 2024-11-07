@@ -76,10 +76,6 @@ fun SignInScreen(
 
         Button(
             onClick = {
-                /*
-                * TODO: Uncomment this to implement login functionality. Remove the line below
-                *  (navController.navigate(Screen.Home.route))
-                * */
                 if (username.isEmpty() || password.isEmpty()) {
                     errorMessage = "Please fill out all fields"
                 } else {
@@ -92,6 +88,7 @@ fun SignInScreen(
                             onSuccess = { response ->
                                 CoroutineScope(Dispatchers.Main).launch {
                                     Log.d("LOGIN_SUCCESS", response.toString())
+                                    UserPreferences.setLoggedIn(context, true)
                                     onSignInSuccess()
                                 }
                             },
@@ -103,7 +100,6 @@ fun SignInScreen(
                         )
                     }
                 }
-                //navController.navigate(Screen.Home.route)
 
             },
             modifier = Modifier.fillMaxWidth()
