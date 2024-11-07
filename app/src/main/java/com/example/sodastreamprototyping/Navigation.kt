@@ -46,6 +46,7 @@ fun Navigation(startDestination: String)
             EditDrinkPage(navController = navController, drinkID = entry.arguments?.getInt("drinkID"))
         }
 
+
 //        composable(route = Screen.OrderHistory.route) {
 //            OrderHistoryScreen(orders = listOf()) // Pass actual data from your ViewModel or Repository
 //        }
@@ -53,9 +54,10 @@ fun Navigation(startDestination: String)
             OrderHistoryScreenDemo(navController)
         }
 
-        composable(route = Screen.NewDrink.route){
+
+        /*composable(route = Screen.NewDrink.route){
             NewDrinkPage(navController)
         }
-
+*/
     }
 }

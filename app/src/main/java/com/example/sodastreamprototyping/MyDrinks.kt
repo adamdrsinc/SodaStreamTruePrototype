@@ -35,9 +35,9 @@ fun MyDrinksPage(navController: NavController) {
         Pair(drinkIngredients[5], 1)
     )
 
-    var drink1 = Drink(ingList1, name = "Custom Drink 1", price = 2.99, quantity = 1, isCustom = false, baseDrink = drinkBases[0])
-    var drink2 = Drink(ingList2, name = "Custom Drink 2", price = 2.99, quantity = 1, isCustom = false, iceQuantity = 5, baseDrink = drinkBases[1])
-    var drink3 = Drink(ingList3, name = "Custom Drink 3", price = 2.99, quantity = 1, isCustom = false, iceQuantity = 3, baseDrink = drinkBases[2])
+    var drink1 = Drink(ingList1, name = "Custom Drink 1", price = 2.99, quantity = 1, isCustom = true, baseDrink = drinkBases[0])
+    var drink2 = Drink(ingList2, name = "Custom Drink 2", price = 2.99, quantity = 1, isCustom = true, iceQuantity = 5, baseDrink = drinkBases[1])
+    var drink3 = Drink(ingList3, name = "Custom Drink 3", price = 2.99, quantity = 1, isCustom = true, iceQuantity = 3, baseDrink = drinkBases[2])
 
     val drinks = listOf(
         drink1,
@@ -49,7 +49,13 @@ fun MyDrinksPage(navController: NavController) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        CreateDrinkButton(navController = navController)
+        CreateDrinkButton(
+            navController = navController,
+            editDrinkNavigaton = {
+                navController.navigate(Screen.Edit.withArgs("-1"))
+            }
+
+        )
         Spacer(modifier = Modifier.height(16.dp))
 
         drinks.forEach { drink ->
@@ -61,11 +67,9 @@ fun MyDrinksPage(navController: NavController) {
 }
 
 @Composable
-fun CreateDrinkButton(navController: NavController) {
+fun CreateDrinkButton(navController: NavController, editDrinkNavigaton: () -> Unit){
     Button(
-        onClick = {
-            navController.navigate(Screen.NewDrink.route)
-        }
+        onClick = editDrinkNavigaton
     ){
         Text(
             text = "Create Drink"
