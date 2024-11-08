@@ -16,32 +16,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
-                Navigation()
+                val isLoggedIn = UserPreferences.isLoggedIn(this@MainActivity)
+                val startDestination = if (isLoggedIn) Screen.Home.route else Screen.SignIn.route
+                Navigation(startDestination)
             }
         }
     }
 }
 
-/*
-@Composable
-fun MainScreen() {
-    val navController = rememberNavController()
-
-    NavHost(navController, startDestination = "sign_in") {
-        composable("sign_in") {
-            SignInScreen(
-                onSignUpClick = { navController.navigate("sign_up") },
-                onSignInSuccess = { navController.navigate("home") }
-            )
-        }
-        composable("sign_up") {
-            SignUpScreen(
-                onSignInClick = { navController.popBackStack() }
-            )
-        }
-        composable("home") {
-            Home()
-        }
-
-    }
-}*/

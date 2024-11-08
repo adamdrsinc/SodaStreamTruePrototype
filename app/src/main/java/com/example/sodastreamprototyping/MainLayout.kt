@@ -33,6 +33,7 @@ fun MainLayout(
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -72,6 +73,20 @@ fun MainLayout(
                     selected = false,
                     onClick = { scope.launch { drawerState.close() } }
                 )
+                Spacer(modifier = Modifier.weight(1f))
+                Button(
+                    onClick = {
+                        UserPreferences.setLoggedIn(context, false)
+                        scope.launch { drawerState.close() }
+                        navController.navigate("sign_in") {
+                            popUpTo("home") { inclusive = true }  // Adjust the route as necessary
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                ) {
+                    Text("Logout", color = Color.White)
+                }
             }
         }
     ) {
@@ -99,7 +114,9 @@ fun MainLayout(
                         }
                     },
                     actions = {
-                        IconButton(onClick = { }) {
+                        IconButton(onClick = {
+                            navController.navigate(Screen.OrderHistory.route)
+                        }) {
                             Icon(Icons.Default.History, contentDescription = "Order History")
                         }
                         IconButton(onClick = {

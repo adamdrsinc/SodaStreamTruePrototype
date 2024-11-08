@@ -49,7 +49,13 @@ fun MyDrinksPage(navController: NavController) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        CreateDrinkButton(navController = navController)
+        CreateDrinkButton(
+            navController = navController,
+            editDrinkNavigaton = {
+                navController.navigate(Screen.Edit.withArgs("-1"))
+            }
+
+        )
         Spacer(modifier = Modifier.height(16.dp))
 
         drinks.forEach { drink ->
@@ -61,11 +67,9 @@ fun MyDrinksPage(navController: NavController) {
 }
 
 @Composable
-fun CreateDrinkButton(navController: NavController) {
+fun CreateDrinkButton(navController: NavController, editDrinkNavigaton: () -> Unit){
     Button(
-        onClick = {
-            navController.navigate(Screen.NewDrink.route)
-        }
+        onClick = editDrinkNavigaton
     ){
         Text(
             text = "Create Drink"
