@@ -7,12 +7,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 
+
 @Composable
-fun Navigation()
+fun Navigation(startDestination: String)
 {
     val navController = rememberNavController();
 
-    NavHost(navController, startDestination = Screen.SignIn.route) {
+    NavHost(navController, startDestination = startDestination) {
         composable(route = Screen.SignIn.route) {
             SignInScreen(
                 onSignUpClick = { navController.navigate("sign_up") },
@@ -45,9 +46,14 @@ fun Navigation()
             EditDrinkPage(navController = navController, drinkID = entry.arguments?.getInt("drinkID"))
         }
 
-        /*composable(route = Screen.Checkout.route){
-            CheckoutScreen()
-        }*/
+
+//        composable(route = Screen.OrderHistory.route) {
+//            OrderHistoryScreen(orders = listOf()) // Pass actual data from your ViewModel or Repository
+//        }
+        composable(route = Screen.OrderHistory.route) {
+            OrderHistoryScreenDemo(navController)
+        }
+
 
         /*composable(route = Screen.NewDrink.route){
             NewDrinkPage(navController)
