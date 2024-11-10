@@ -26,6 +26,15 @@ class GenerateDrinksViewModel @Inject constructor(private val ai: TensorFlowAPI)
     }
 
     /**
+     * removes all drinks from list of ai generated drinks for a fresh start
+     */
+    fun clear(){
+        _drinks.value = List(ai.baseSize){
+            emptyList()
+        }
+    }
+
+    /**
      * adds another unique AI generated drink to the [base]'s list. Gives up if the AI is not able to make a unique
      * drink in a limited number of attempts
      */
@@ -33,10 +42,10 @@ class GenerateDrinksViewModel @Inject constructor(private val ai: TensorFlowAPI)
         var newDrink = makeRandDrink()
         val attempts = 30
 
-        for(i in 0 until attempts){
+        repeat(attempts){
             if(!drinks.value[base].contains(newDrink)){
                 addDrink(base, newDrink)
-                break
+                return
             }
             newDrink = makeRandDrink()
         }
