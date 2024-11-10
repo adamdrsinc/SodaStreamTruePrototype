@@ -15,7 +15,6 @@ import kotlin.random.Random
 class GenerateDrinksViewModel @Inject constructor(private val ai: TensorFlowAPI): ViewModel() {
     private val _drinks = MutableStateFlow<List<List<Recipe>>>(emptyList())
     val drinks = _drinks.asStateFlow()
-
     init{
         viewModelScope.launch{
             _drinks.value = List(ai.baseSize){ base ->
@@ -27,16 +26,33 @@ class GenerateDrinksViewModel @Inject constructor(private val ai: TensorFlowAPI)
     }
 
     /**
-     *
+     * adds another unique AI generated drink to the [base]'s list. Gives up if the AI is not able to make a unique
+     * drink in a limited number of attempts
      */
-    fun makeRandDrink(recipe: Recipe? = null): Recipe {
+    fun expand(base: Int){
+        var newDrink = makeRandDrink()
+        val attempts = 30
+
+        for(i in 0 until attempts){
+            if(!drinks.value[base].contains(newDrink)){
+                addDrink(base, newDrink)
+                break
+            }
+            newDrink = makeRandDrink()
+        }
+    }
+
+    /**
+     * Ai will add flavors to the [recipe] until it thinks it is complete. If no recipe is provided, a base will be
+     * chosen at random, starting a new recipe. Returns the completed recipe.
+     */
+    private fun makeRandDrink(recipe: Recipe? = null): Recipe {
         if (recipe == null) {
             val base = Random.nextInt(0, ai.baseSize)
             return makeRandDrink(Recipe(base))
         }
 
 
-        //val available flavors = AI.predict(recipe)
         val options = ai.generateDrink(recipe.base, recipe.flavors.toIntArray())
         if(options.isEmpty()){
             return recipe
@@ -50,12 +66,12 @@ class GenerateDrinksViewModel @Inject constructor(private val ai: TensorFlowAPI)
     }
 
     /**
-     * adds another AI generated drink to the [base]'s list
+     * adds [drink] to the [base]'s list of available drinks
      */
-    fun expand(base: Int){
+    private fun addDrink(base: Int, drink: Recipe){
         _drinks.value = List(_drinks.value.size){
             if(it == base){
-                drinks.value[it] + makeRandDrink(Recipe(base))
+                drinks.value[it] + drink
             }
             else{
                 drinks.value[it]
