@@ -319,7 +319,7 @@ fun DropdownMenuDrinkBases(drink: Drink?){
 
     val drinkBases = context.resources.getStringArray(R.array.drink_bases)
 
-    var drinkIndex = drinkBases.indexOf(drink?.baseDrink)
+    var drinkIndex = drink?.baseDrink ?: -1
     if(drinkIndex == -1){
         return
     }
@@ -357,7 +357,7 @@ fun DropdownMenuDrinkBases(drink: Drink?){
                         selectedOptionIndex.value = index
                         isExpanded.value = false
 
-                        drink?.baseDrink = baseName
+                        drink?.baseDrink = index
                     }
                 )
             }

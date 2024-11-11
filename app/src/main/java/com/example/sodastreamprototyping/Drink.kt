@@ -10,7 +10,7 @@ data class Drink(
     var quantity: Int = 1,
     var iceQuantity: Int = 0,
     val isCustom: Boolean = false,
-    var baseDrink: String = "Cola",
+    var baseDrink: Int = 0,
     var description: String? = null,
     var drinkID: Int? = null
 ) {

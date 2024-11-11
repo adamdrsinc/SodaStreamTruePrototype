@@ -193,6 +193,8 @@ fun BasketItemCard(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val baseArray = LocalContext.current.resources.getStringArray(R.array.drink_bases)
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -209,9 +211,7 @@ fun BasketItemCard(
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
-        drink.baseDrink?.let {
-            Text(text = "Base: $it", fontSize = 16.sp)
-        }
+        Text(text = "Base: ${baseArray[drink.baseDrink]}", fontSize = 16.sp)
 
         DrinkRow("Quantity", drink.quantity.toString(), screenWidth)
         DrinkRow("Ice", drink.iceQuantity.toString(), screenWidth)

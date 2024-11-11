@@ -36,9 +36,9 @@ fun MenuPage() {
         Pair(drinkIngredients[5], 1)
     )
 
-    var drink1 = Drink(ingList1, name = "Strawberry Creamer", price = 2.99, quantity = 1, isCustom = false, baseDrink = drinkBases[0])
-    var drink2 = Drink(ingList2, name = "Something Something", price = 2.99, quantity = 1, isCustom = false, iceQuantity = 5, baseDrink = drinkBases[1])
-    var drink3 = Drink(ingList3, name = "Other Thing", price = 2.99, quantity = 1, isCustom = false, iceQuantity = 3, baseDrink = drinkBases[2])
+    var drink1 = Drink(ingList1, name = "Strawberry Creamer", price = 2.99, quantity = 1, isCustom = false, baseDrink = 0)
+    var drink2 = Drink(ingList2, name = "Something Something", price = 2.99, quantity = 1, isCustom = false, iceQuantity = 5, baseDrink = 1)
+    var drink3 = Drink(ingList3, name = "Other Thing", price = 2.99, quantity = 1, isCustom = false, iceQuantity = 3, baseDrink = 2)
 
     val drinks = listOf(
         drink1,
