@@ -39,7 +39,7 @@ class GenerateDrinksViewModel @Inject constructor(private val ai: TensorFlowAPI)
      * drink in a limited number of attempts
      */
     fun expand(base: Int){
-        var newDrink = makeRandDrink()
+        var newDrink = makeRandDrink(Recipe(base))
         val attempts = 30
 
         repeat(attempts){
@@ -47,7 +47,7 @@ class GenerateDrinksViewModel @Inject constructor(private val ai: TensorFlowAPI)
                 addDrink(base, newDrink)
                 return
             }
-            newDrink = makeRandDrink()
+            newDrink = makeRandDrink(Recipe(base))
         }
     }
 
