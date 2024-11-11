@@ -16,6 +16,7 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -23,6 +24,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.verticalScroll
+import com.example.practice.ApiRequestHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,7 +47,21 @@ fun EditDrinkPage(navController: NavController, drinkID: Int?) {
         drinkCopy = remember { Drink(name = "New Drink", isCustom = true, ingredients = mutableStateListOf<Pair<Int, Int>>()) }
     }
 
+    //TODO: Get drink flavors from DB, not from resources
     val drinkFlavors = context.resources.getStringArray(R.array.drink_flavors)
+    //TODO: Replace above line with the code below
+    /*var drinkFlavorsFromDB: List<String> = listOf()
+    ApiRequestHelper.fetchIngredients(
+        context = context,
+        onSuccess = { ingredients ->
+            drinkFlavorsFromDB = ingredients
+        },
+        onError = { error ->
+            Toast.makeText(context, "Error fetching ingredients: $error", Toast.LENGTH_SHORT).show()
+        }
+    )*/
+
+
     val ingredientsState = remember { drinkCopy.ingredients }
     var drinkQuantity = remember { drinkCopy.quantity }
     var drinkName by remember { mutableStateOf(drinkCopy.name) }
@@ -81,6 +97,17 @@ fun EditDrinkPage(navController: NavController, drinkID: Int?) {
                 newDrink = drinkCopy,
                 ingredientsState = ingredientsState
             )
+            //TODO: Replace above accordion with following code when syrup retrieval implemented.
+            /*if(drinkFlavorsFromDB.isEmpty()){
+                Text("Ingredients could not be retrieved.")
+            }else{
+                AccordionSectionIngredientRow(
+                    title = "Ingredients",
+                    items = drinkFlavors,
+                    newDrink = drinkCopy,
+                    ingredientsState = ingredientsState
+                )
+            }*/
             Spacer(modifier = Modifier.height(16.dp))
 
             // TextField to change the drink name
@@ -125,7 +152,6 @@ fun EditDrinkPage(navController: NavController, drinkID: Int?) {
 @Composable
 fun AccordionSectionIngredientRow(title: String, items: Array<String>, newDrink: Drink, ingredientsState: SnapshotStateList<Pair<Int, Int>>) {
     var expanded by remember { mutableStateOf(false) }
-    val scrollState = rememberScrollState()
 
     Column(
         modifier = Modifier
@@ -160,23 +186,27 @@ fun AccordionSectionIngredientRow(title: String, items: Array<String>, newDrink:
 }
 
 @Composable
-fun IngredientRow(newDrink: Drink, ingredient: Pair<Int, String>, ingredientsState: SnapshotStateList<Pair<Int, Int>>) {
+fun IngredientRow(newDrink: Drink, ingredient: Pair<Int, String>, ingredientsState: SnapshotStateList<Pair<Int,
+        Int>>, aiRecommended: Boolean = false) {
     val context = LocalContext.current
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable {
-                val ingredientIncreased = incrementIngredient(
-                    newDrink = newDrink,
-                    ingredient = ingredient.first,
-                    ingredientsState = ingredientsState
-                )
-                if (!ingredientIncreased) {
-                    Toast.makeText(context, "Syrup count cannot exceed ${Drink.MAX_PUMP_COUNT}", Toast.LENGTH_SHORT).show()
-                }
+    val modifier = Modifier
+        .background(if (aiRecommended) Color.Yellow else Color.Transparent)
+        .fillMaxWidth()
+        .clickable {
+            val ingredientIncreased = incrementIngredient(
+                newDrink = newDrink,
+                ingredient = ingredient.first,
+                ingredientsState = ingredientsState
+            )
+            if (!ingredientIncreased) {
+                Toast.makeText(context, "Syrup count cannot exceed ${Drink.MAX_PUMP_COUNT}", Toast.LENGTH_SHORT).show()
             }
-            .padding(16.dp),
+        }
+        .padding(16.dp)
+
+    Row(
+        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(

@@ -93,6 +93,8 @@ class ApiRequestHelper {
             requestQueue.add(jsonObjectRequest)
         }
 
+        // PAYMENT HANDLING
+        // Function to fetch payment intent
         fun fetchPaymentIntent(
             context: Context,
             amount: Double,
@@ -118,6 +120,42 @@ class ApiRequestHelper {
                     }
                 },
                 { error ->
+                    Log.e("API_ERROR", error.toString())
+                    onError(error.message ?: "An error occurred")
+                }
+            )
+
+            val requestQueue: RequestQueue = Volley.newRequestQueue(context)
+            requestQueue.add(jsonObjectRequest)
+        }
+
+
+        // DRINK REQUEST HANDLING
+        // Function to fetch ingredients data
+        fun fetchIngredients(
+            context: Context,
+            onSuccess: (List<String>) -> Unit,
+            onError: (String) -> Unit
+        ) {
+            val url = "${ApiRequestHelper.Companion.BASE_URL}/ingredients"
+
+            val jsonObjectRequest = JsonObjectRequest(
+                Request.Method.GET, url, null,
+                Response.Listener { response ->
+                    try {
+                        val syrups = mutableListOf<String>()
+                        val ingredientsArray = response.getJSONArray("ingredients")
+                        for (i in 0 until ingredientsArray.length()) {
+                            val syrup = ingredientsArray.getString(i)
+                            syrups.add(syrup)
+                        }
+                        onSuccess(syrups)
+                    } catch (e: Exception) {
+                        Log.e("API_ERROR", e.toString())
+                        onError("Failed to parse ingredients")
+                    }
+                },
+                Response.ErrorListener { error ->
                     Log.e("API_ERROR", error.toString())
                     onError(error.message ?: "An error occurred")
                 }
