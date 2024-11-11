@@ -45,6 +45,7 @@ android {
 
 dependencies {
     // Jetpack Compose dependencies
+
     implementation(libs.ui)
     implementation(libs.material3)
 
