@@ -2,8 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
+    id("kotlin-kapt")
 }
 
 
@@ -45,12 +45,13 @@ android {
 
 dependencies {
     // Jetpack Compose dependencies
-    implementation("androidx.compose.ui:ui:1.7.4")
-    implementation("androidx.compose.material3:material3:1.3.1")
+
+    implementation(libs.ui)
+    implementation(libs.material3)
 
     // Jetpack Compose Navigation
-    implementation("androidx.navigation:navigation-compose:2.8.3")
-    implementation("androidx.compose.material:material-icons-extended:1.5.1")
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -68,15 +69,15 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     // Volley
-    implementation ("com.android.volley:volley:1.2.1")
+    implementation (libs.volley)
 
     // Stripe
-    implementation ("com.stripe:stripe-android:20.1.0")
-    implementation ("com.github.kittinunf.fuel:fuel:2.3.1")
-    implementation ("com.github.kittinunf.fuel:fuel-json:2.3.1")
+    implementation (libs.stripe.android)
+    implementation (libs.fuel)
+    implementation (libs.fuel.json)
 
     // Google Pay
-    implementation ("com.google.android.gms:play-services-wallet:18.1.3")
+    implementation (libs.play.services.wallet)
 
     // Tensorflow
     implementation(libs.tensorflow.lite)
@@ -91,4 +92,8 @@ dependencies {
 
 kapt {
     correctErrorTypes = true
+}
+
+hilt {
+    enableAggregatingTask = true //gets rid of hilt warnings, also faster build times
 }
