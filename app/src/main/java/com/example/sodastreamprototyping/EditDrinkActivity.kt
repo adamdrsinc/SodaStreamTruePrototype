@@ -133,6 +133,8 @@ fun EditDrinkPage(navController: NavController, drinkID: Int?) {
             // Save button
             Button(
                 onClick = {
+                    drinkCopy.price = calculateDrinkPrice(drinkCopy)
+
                     // Save changes to the drink
                     if(Basket.getDrinks().find { it.drinkID == drinkID } == null){
                         Basket.addDrink(drinkCopy)
@@ -442,3 +444,13 @@ fun decrementIngredient(
     }
 }
 
+fun calculateDrinkPrice(drink: Drink): Double{
+    var price = 2.0
+    val syrupPrice = 0.1
+
+    drink.ingredients.forEach { (ingredientName, quantity) ->
+        price += syrupPrice * quantity
+    }
+
+    return price
+}
