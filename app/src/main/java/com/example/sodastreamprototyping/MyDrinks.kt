@@ -22,17 +22,17 @@ fun MyDrinksPage(navController: NavController) {
     val drinkBases = context.resources.getStringArray(R.array.drink_bases)
     val drinkIngredients = context.resources.getStringArray(R.array.drink_flavors)
 
-    var ingList1 : SnapshotStateList<Pair<String, Int>> = mutableStateListOf(
-        Pair(drinkIngredients[0], 1),
-        Pair(drinkIngredients[1], 1)
+    var ingList1 : SnapshotStateList<Pair<Int, Int>> = mutableStateListOf(
+        Pair(0, 1),
+        Pair(1, 1)
     )
-    var ingList2 : SnapshotStateList<Pair<String, Int>> = mutableStateListOf(
-        Pair(drinkIngredients[2], 1),
-        Pair(drinkIngredients[3], 1)
+    var ingList2 : SnapshotStateList<Pair<Int, Int>> = mutableStateListOf(
+        Pair(2, 1),
+        Pair(3, 1)
     )
-    var ingList3 : SnapshotStateList<Pair<String, Int>> = mutableStateListOf(
-        Pair(drinkIngredients[4], 1),
-        Pair(drinkIngredients[5], 1)
+    var ingList3 : SnapshotStateList<Pair<Int, Int>> = mutableStateListOf(
+        Pair(4, 1),
+        Pair(5, 1)
     )
 
     var drink1 = Drink(ingList1, name = "Custom Drink 1", price = 2.99, quantity = 1, isCustom = true, baseDrink = 0)

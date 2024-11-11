@@ -194,7 +194,7 @@ fun BasketItemCard(
     onDelete: () -> Unit
 ) {
     val baseArray = LocalContext.current.resources.getStringArray(R.array.drink_bases)
-
+    val flavorArray = LocalContext.current.resources.getStringArray(R.array.drink_flavors)
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -217,7 +217,7 @@ fun BasketItemCard(
         DrinkRow("Ice", drink.iceQuantity.toString(), screenWidth)
 
         drink.ingredients.forEach { ingredient ->
-            DrinkRow(ingredient.first, ingredient.second.toString(), screenWidth)
+            DrinkRow(flavorArray[ingredient.first], ingredient.second.toString(), screenWidth)
         }
 
         ActionButtons(isCustom = drink.isCustom, onEdit = onEdit, onDelete = onDelete)
