@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
 @Composable
-fun Home(navController: NavController) {
+fun Home(navController: NavController, onDrinkEdit: (Drink?) -> Unit) {
     MainLayout(navController = navController) { innerPadding ->
         Column(
             modifier = Modifier
@@ -38,7 +38,7 @@ fun Home(navController: NavController) {
 
             when (selectedTabIndex) {
                 0 -> MenuPage()
-                1 -> MyDrinksPage(navController)
+                1 -> MyDrinksPage(navController, onDrinkEdit)
                 2 -> GenerateDrinksPage()
             }
         }

@@ -2,6 +2,7 @@ package com.example.sodastreamprototyping
 
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -12,6 +13,13 @@ fun Navigation(startDestination: String)
 {
     val navController = rememberNavController()
     val viewModel : NavigationViewModel = viewModel()
+
+
+    fun navigateToEditDrink(drink: Drink?) {
+        viewModel.selectedDrink = drink
+        navController.navigate(Screen.Edit.route)
+    }
+
 
     NavHost(navController, startDestination = startDestination) {
         composable(route = Screen.SignIn.route) {
@@ -27,14 +35,11 @@ fun Navigation(startDestination: String)
             )
         }
         composable(route = Screen.Home.route) {
-            Home(navController = navController)
+            Home(navController = navController){navigateToEditDrink(it)}
         }
 
         composable(route = Screen.Basket.route){
-            ShoppingBasket(navController){
-                viewModel.selectedDrink = it
-                navController.navigate(Screen.Edit.route)
-            }
+            ShoppingBasket(navController){navigateToEditDrink(it)}
         }
 
         composable(route = Screen.Edit.route){

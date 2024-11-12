@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
 @Composable
-fun MyDrinksPage(navController: NavController) {
+fun MyDrinksPage(navController: NavController, onCreateDrink: (Drink?) -> Unit) {
     Spacer(modifier = Modifier.height(16.dp))
 
     val context = LocalContext.current
@@ -51,9 +51,7 @@ fun MyDrinksPage(navController: NavController) {
     ) {
         CreateDrinkButton(
             navController = navController,
-            editDrinkNavigaton = {
-                navController.navigate(Screen.Edit.route)
-            }
+            editDrinkNavigaton = onCreateDrink
 
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -67,9 +65,9 @@ fun MyDrinksPage(navController: NavController) {
 }
 
 @Composable
-fun CreateDrinkButton(navController: NavController, editDrinkNavigaton: () -> Unit){
+fun CreateDrinkButton(navController: NavController, editDrinkNavigaton: (Drink?) -> Unit){
     Button(
-        onClick = editDrinkNavigaton
+        onClick = {editDrinkNavigaton(null)}
     ){
         Text(
             text = "Create Drink"
