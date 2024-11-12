@@ -44,7 +44,7 @@ fun EditDrinkPage(navController: NavController, drinkID: Int?) {
 
     var drinkCopy = drink
     if(drinkCopy == null) {
-        drinkCopy = remember { Drink(name = "New Drink", isCustom = true, ingredients = mutableStateListOf<Pair<String, Int>>()) }
+        drinkCopy = remember { Drink(name = "New Drink", isCustom = true, ingredients = mutableStateListOf<Pair<Int, Int>>()) }
     }
 
     //TODO: Get drink flavors from DB, not from resources
@@ -152,7 +152,7 @@ fun EditDrinkPage(navController: NavController, drinkID: Int?) {
 }
 
 @Composable
-fun AccordionSectionIngredientRow(title: String, items: Array<String>, newDrink: Drink, ingredientsState: SnapshotStateList<Pair<String, Int>>) {
+fun AccordionSectionIngredientRow(title: String, items: Array<String>, newDrink: Drink, ingredientsState: SnapshotStateList<Pair<Int, Int>>) {
     var expanded by remember { mutableStateOf(false) }
 
     Column(
@@ -175,9 +175,12 @@ fun AccordionSectionIngredientRow(title: String, items: Array<String>, newDrink:
             enter = expandVertically(),
             exit = shrinkVertically()
         ) {
-            Column{
-                items.forEach { item ->
-                    IngredientRow(newDrink = newDrink, ingredient = item, ingredientsState = ingredientsState)
+            Column(
+                //modifier = Modifier.verticalScroll(scrollState)
+                    //.height(200.dp) // Set a fixed height for the scrollable area
+            ) {
+                items.forEachIndexed { index, item ->
+                    IngredientRow(newDrink = newDrink, ingredient = Pair(index, item), ingredientsState = ingredientsState)
                 }
             }
         }
@@ -185,7 +188,8 @@ fun AccordionSectionIngredientRow(title: String, items: Array<String>, newDrink:
 }
 
 @Composable
-fun IngredientRow(newDrink: Drink, ingredient: String, ingredientsState: SnapshotStateList<Pair<String, Int>>, aiRecommended: Boolean = false) {
+fun IngredientRow(newDrink: Drink, ingredient: Pair<Int, String>, ingredientsState: SnapshotStateList<Pair<Int,
+        Int>>, aiRecommended: Boolean = false) {
     val context = LocalContext.current
 
     val modifier = Modifier
@@ -194,7 +198,7 @@ fun IngredientRow(newDrink: Drink, ingredient: String, ingredientsState: Snapsho
         .clickable {
             val ingredientIncreased = incrementIngredient(
                 newDrink = newDrink,
-                ingredient = ingredient,
+                ingredient = ingredient.first,
                 ingredientsState = ingredientsState
             )
             if (!ingredientIncreased) {
@@ -208,7 +212,7 @@ fun IngredientRow(newDrink: Drink, ingredient: String, ingredientsState: Snapsho
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = ingredient,
+            text = ingredient.second,
             fontSize = 16.sp,
             modifier = Modifier.weight(1f)
         )
@@ -216,8 +220,9 @@ fun IngredientRow(newDrink: Drink, ingredient: String, ingredientsState: Snapsho
 }
 
 @Composable
-fun CurrentDrinkSummary(newDrink: Drink, ingredientsState: SnapshotStateList<Pair<String, Int>>) {
+fun CurrentDrinkSummary(newDrink: Drink, ingredientsState: SnapshotStateList<Pair<Int, Int>>) {
     val context = LocalContext.current
+    val drinkFlavors = context.resources.getStringArray(R.array.drink_flavors)
 
     Column(
         modifier = Modifier
@@ -246,7 +251,7 @@ fun CurrentDrinkSummary(newDrink: Drink, ingredientsState: SnapshotStateList<Pai
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = ingredient,
+                        text = drinkFlavors[ingredient],
                         fontSize = 16.sp,
                         modifier = Modifier.weight(1f)
                     )
@@ -347,7 +352,7 @@ fun DropdownMenuDrinkBases(drink: Drink?){
 
     val drinkBases = context.resources.getStringArray(R.array.drink_bases)
 
-    var drinkIndex = drinkBases.indexOf(drink?.baseDrink)
+    var drinkIndex = drink?.baseDrink ?: -1
     if(drinkIndex == -1){
         return
     }
@@ -385,7 +390,7 @@ fun DropdownMenuDrinkBases(drink: Drink?){
                         selectedOptionIndex.value = index
                         isExpanded.value = false
 
-                        drink?.baseDrink = baseName
+                        drink?.baseDrink = index
                     }
                 )
             }
@@ -406,8 +411,8 @@ fun TitleText(text:  String){
 
 fun incrementIngredient(
     newDrink: Drink,
-    ingredient: String,
-    ingredientsState: SnapshotStateList<Pair<String, Int>>
+    ingredient: Int,
+    ingredientsState: SnapshotStateList<Pair<Int, Int>>
 ): Boolean {
     val existingIngredient = ingredientsState.find { it.first == ingredient }
 
@@ -428,8 +433,8 @@ fun incrementIngredient(
 
 fun decrementIngredient(
     newDrink: Drink,
-    ingredient: String,
-    ingredientsState: SnapshotStateList<Pair<String, Int>>
+    ingredient: Int,
+    ingredientsState: SnapshotStateList<Pair<Int, Int>>
 ): Boolean {
     val existingIngredient = ingredientsState.find { it.first == ingredient }
 
