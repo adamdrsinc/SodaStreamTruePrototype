@@ -5,7 +5,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -31,7 +30,11 @@ import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetContract
 
 @Composable
-fun ShoppingBasket(navController: NavController, modifier: Modifier = Modifier) {
+fun ShoppingBasket(
+    navController: NavController,
+    modifier: Modifier = Modifier,
+    onDrinkEdit: (Drink) -> Unit
+) {
     val context = LocalContext.current
     val config = LocalConfiguration.current
 
@@ -81,7 +84,7 @@ fun ShoppingBasket(navController: NavController, modifier: Modifier = Modifier) 
         Spacer(modifier = Modifier.height(16.dp))
 
         // Basket items display
-        BasketItems(navController)
+        BasketItems(navController, onDrinkEdit)
 
         // Checkout Button (trigger payment directly)
         CheckoutButton(
@@ -157,7 +160,7 @@ private fun onPaymentSheetResult(
 
 
 @Composable
-fun BasketItems(navController: NavController) {
+fun BasketItems(navController: NavController, onDrinkEdit: (Drink) -> Unit) {
     val config = LocalConfiguration.current
     val screenWidth = config.screenWidthDp
     val screenHeight = config.screenHeightDp
@@ -175,7 +178,9 @@ fun BasketItems(navController: NavController) {
             BasketItemCard(
                 drink = drink,
                 screenWidth = screenWidth,
-                onEdit = { navController.navigate(Screen.Edit.withArgs(drink.drinkID.toString())) },
+                onEdit = {
+                    onDrinkEdit(drink)
+                },
                 onDelete = {
                     Basket.basketDrinks.removeAt(index)
                     drinks.removeAt(index)

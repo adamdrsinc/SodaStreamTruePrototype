@@ -52,7 +52,7 @@ fun MyDrinksPage(navController: NavController) {
         CreateDrinkButton(
             navController = navController,
             editDrinkNavigaton = {
-                navController.navigate(Screen.Edit.withArgs("-1"))
+                navController.navigate(Screen.Edit.route)
             }
 
         )

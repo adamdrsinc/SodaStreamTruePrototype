@@ -1,17 +1,17 @@
 package com.example.sodastreamprototyping
 
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavType
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-
+import com.example.sodastreamprototyping.viewModel.NavigationViewModel
 
 @Composable
 fun Navigation(startDestination: String)
 {
-    val navController = rememberNavController();
+    val navController = rememberNavController()
+    val viewModel : NavigationViewModel = viewModel()
 
     NavHost(navController, startDestination = startDestination) {
         composable(route = Screen.SignIn.route) {
@@ -31,33 +31,20 @@ fun Navigation(startDestination: String)
         }
 
         composable(route = Screen.Basket.route){
-            ShoppingBasket(navController)
+            ShoppingBasket(navController){
+                viewModel.selectedDrink = it
+                navController.navigate(Screen.Edit.route)
+            }
         }
 
-        composable(
-            route = Screen.Edit.route + "/{drinkID}",
-            arguments = listOf(
-                navArgument("drinkID"){
-                    type = NavType.IntType
-                    nullable = false
-                }
-            )){
-            entry ->
-            EditDrinkPage(navController = navController, drinkID = entry.arguments?.getInt("drinkID"))
+        composable(route = Screen.Edit.route){
+            EditDrinkPage(navController, viewModel.selectedDrink)
         }
 
-
-//        composable(route = Screen.OrderHistory.route) {
-//            OrderHistoryScreen(orders = listOf()) // Pass actual data from your ViewModel or Repository
-//        }
         composable(route = Screen.OrderHistory.route) {
             OrderHistoryScreenDemo(navController)
         }
 
-
-        /*composable(route = Screen.NewDrink.route){
-            NewDrinkPage(navController)
-        }
-*/
     }
+
 }
