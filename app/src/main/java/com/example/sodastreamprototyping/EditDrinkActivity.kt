@@ -23,8 +23,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.foundation.verticalScroll
-import com.example.practice.ApiRequestHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
