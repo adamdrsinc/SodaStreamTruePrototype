@@ -35,9 +35,9 @@ fun MyDrinksPage(navController: NavController, onCreateDrink: (Drink?) -> Unit) 
         Pair(5, 1)
     )
 
-    var drink1 = Drink(ingList1, name = "Custom Drink 1", price = 2.99, quantity = 1, isCustom = true, baseDrink = 0)
-    var drink2 = Drink(ingList2, name = "Custom Drink 2", price = 2.99, quantity = 1, isCustom = true, iceQuantity = 5, baseDrink = 1)
-    var drink3 = Drink(ingList3, name = "Custom Drink 3", price = 2.99, quantity = 1, isCustom = true, iceQuantity = 3, baseDrink = 2)
+    var drink1 = Drink(ingList1, name = "Custom Drink 1", quantity = 1, isCustom = true, baseDrink = 0)
+    var drink2 = Drink(ingList2, name = "Custom Drink 2", quantity = 1, isCustom = true, iceQuantity = 5, baseDrink = 1)
+    var drink3 = Drink(ingList3, name = "Custom Drink 3", quantity = 1, isCustom = true, iceQuantity = 3, baseDrink = 2)
 
     val drinks = listOf(
         drink1,

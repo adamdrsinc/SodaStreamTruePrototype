@@ -58,7 +58,7 @@ fun ShoppingBasket(
     )
 
     // Calculate the total amount from basket items
-    val totalAmount = Basket.basketDrinks.sumOf { it.price * it.quantity } // Assuming `price` is defined
+    val totalAmount = Basket.basketDrinks.sumOf { it.getPrice() * it.quantity } // Assuming `price` is defined
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
