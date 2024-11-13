@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
 @Composable
-fun MyDrinksPage(navController: NavController) {
+fun MyDrinksPage(navController: NavController, onCreateDrink: (Drink?) -> Unit) {
     Spacer(modifier = Modifier.height(16.dp))
 
     val context = LocalContext.current
@@ -35,9 +35,9 @@ fun MyDrinksPage(navController: NavController) {
         Pair(5, 1)
     )
 
-    var drink1 = Drink(ingList1, name = "Custom Drink 1", price = 2.99, quantity = 1, isCustom = true, baseDrink = 0)
-    var drink2 = Drink(ingList2, name = "Custom Drink 2", price = 2.99, quantity = 1, isCustom = true, iceQuantity = 5, baseDrink = 1)
-    var drink3 = Drink(ingList3, name = "Custom Drink 3", price = 2.99, quantity = 1, isCustom = true, iceQuantity = 3, baseDrink = 2)
+    var drink1 = Drink(ingList1, name = "Custom Drink 1", quantity = 1, isCustom = true, baseDrink = 0)
+    var drink2 = Drink(ingList2, name = "Custom Drink 2", quantity = 1, isCustom = true, iceQuantity = 5, baseDrink = 1)
+    var drink3 = Drink(ingList3, name = "Custom Drink 3", quantity = 1, isCustom = true, iceQuantity = 3, baseDrink = 2)
 
     val drinks = listOf(
         drink1,
@@ -51,9 +51,7 @@ fun MyDrinksPage(navController: NavController) {
     ) {
         CreateDrinkButton(
             navController = navController,
-            editDrinkNavigaton = {
-                navController.navigate(Screen.Edit.withArgs("-1"))
-            }
+            editDrinkNavigaton = onCreateDrink
 
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -67,9 +65,9 @@ fun MyDrinksPage(navController: NavController) {
 }
 
 @Composable
-fun CreateDrinkButton(navController: NavController, editDrinkNavigaton: () -> Unit){
+fun CreateDrinkButton(navController: NavController, editDrinkNavigaton: (Drink?) -> Unit){
     Button(
-        onClick = editDrinkNavigaton
+        onClick = {editDrinkNavigaton(null)}
     ){
         Text(
             text = "Create Drink"
