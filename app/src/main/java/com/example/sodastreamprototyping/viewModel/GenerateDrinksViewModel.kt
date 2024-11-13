@@ -1,5 +1,6 @@
 package com.example.sodastreamprototyping.viewModel
 
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
@@ -15,6 +16,8 @@ import javax.inject.Inject
 @HiltViewModel
 class GenerateDrinksViewModel @Inject constructor(private val ai: TensorFlowAPI): ViewModel() {
     private val _drinks = MutableStateFlow<List<List<Drink>>>(emptyList())
+    var exhaustedDrinks: SnapshotStateList<Boolean> = mutableStateListOf(*Array(ai.baseSize){false})
+
     val drinks = _drinks.asStateFlow()
     val defaultName = "AI Creation"
     val flavorOptions: Array<MutableMap<List<Int>, MutableList<Int>>> = Array(ai.baseSize){
@@ -38,6 +41,9 @@ class GenerateDrinksViewModel @Inject constructor(private val ai: TensorFlowAPI)
         flavorOptions.forEach {
             it.clear()
         }
+        exhaustedDrinks.forEachIndexed{index, _ ->
+            exhaustedDrinks[index] = false
+        }
     }
 
     /**
@@ -49,6 +55,7 @@ class GenerateDrinksViewModel @Inject constructor(private val ai: TensorFlowAPI)
         if(newDrink != null){
             addDrink(base, newDrink)
         }
+        else exhaustedDrinks[base] = true
     }
 
     /**

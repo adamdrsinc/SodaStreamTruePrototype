@@ -26,7 +26,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.sodastreamprototyping.viewModel.GenerateDrinksViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import kotlinx.coroutines.CoroutineScope
@@ -86,7 +85,7 @@ fun GenerateDrinksPage() {
                         }
                     }
                     item {
-                        if (drinks[base].size < 100) {
+                        if (drinks[base].size < 100 && viewModel.exhaustedDrinks[base] == false) {
                             CircularProgressIndicator()
 
                             LaunchedEffect(drinks) {
