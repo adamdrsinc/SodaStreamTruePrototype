@@ -77,9 +77,9 @@ fun GenerateDrinksPage() {
                                 .padding(5.dp)
                         ) {
                             Column(Modifier.padding(8.dp)) {
-                                Text(baseArray[recipe.base], fontWeight = FontWeight.Bold)
+                                Text(baseArray[recipe.baseDrink], fontWeight = FontWeight.Bold)
                                 Spacer(modifier = Modifier.height(4.dp))
-                                for (flavor in recipe.getUsedFlavors()) {
+                                for (flavor in recipe.ingredients) {
                                     Text(flavor.second.toString() + "X " + flavorArray[flavor.first])
                                 }
                             }

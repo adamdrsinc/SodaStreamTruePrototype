@@ -1,36 +1,42 @@
 package com.example.sodastreamprototyping.viewModel
 
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.sodastreamprototyping.Drink
 import com.example.sodastreamprototyping.TensorFlowAPI
-import com.example.sodastreamprototyping.model.Recipe
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.random.Random
 
 @HiltViewModel
 class GenerateDrinksViewModel @Inject constructor(private val ai: TensorFlowAPI): ViewModel() {
-    private val _drinks = MutableStateFlow<List<List<Recipe>>>(emptyList())
+    private val _drinks = MutableStateFlow<List<List<Drink>>>(emptyList())
     val drinks = _drinks.asStateFlow()
+    val defaultName = "AI Creation"
+    val flavorOptions: Array<MutableMap<List<Int>, MutableList<Int>>> = Array(ai.baseSize){
+        mutableMapOf()
+    } //use memoized approach and store results of AI for better efficiency.
     init{
         viewModelScope.launch{
             _drinks.value = List(ai.baseSize){ base ->
-                List(1){
-                   makeRandDrink(Recipe(base))
-                }
+                emptyList()
             }
         }
     }
 
     /**
-     * removes all drinks from list of ai generated drinks for a fresh start
+     * removes all drinks from list of ai generated drinks for a fresh start.
      */
     fun clear(){
         _drinks.value = List(ai.baseSize){
             emptyList()
+        }
+        flavorOptions.forEach {
+            it.clear()
         }
     }
 
@@ -39,45 +45,60 @@ class GenerateDrinksViewModel @Inject constructor(private val ai: TensorFlowAPI)
      * drink in a limited number of attempts
      */
     fun expand(base: Int){
-        var newDrink = makeRandDrink(Recipe(base))
-        val attempts = 30
-
-        repeat(attempts){
-            if(!drinks.value[base].contains(newDrink)){
-                addDrink(base, newDrink)
-                return
-            }
-            newDrink = makeRandDrink(Recipe(base))
+        var newDrink = makeRandDrink(base)
+        if(newDrink != null){
+            addDrink(base, newDrink)
         }
     }
 
     /**
-     * Ai will add flavors to the [recipe] until it thinks it is complete. If no recipe is provided, a base will be
-     * chosen at random, starting a new recipe. Returns the completed recipe.
+     * Ai will add flavors to the provided [flavors]until it thinks it is complete. If no recipe is provided, a base
+     * will be chosen at random, starting a new recipe. Returns the completed recipe. All generated drinks will be
+     * unique until [clear] is called.
      */
-    private fun makeRandDrink(recipe: Recipe? = null): Recipe {
-        if (recipe == null) {
-            val base = Random.nextInt(0, ai.baseSize)
-            return makeRandDrink(Recipe(base))
-        }
-
-
-        val options = ai.generateDrink(recipe.base, recipe.flavors.toIntArray())
+    private fun makeRandDrink(base: Int, flavors: IntArray = IntArray(ai.flavorSize)): Drink? {
+        val options = getOptions(base, flavors)
         if(options.isEmpty()){
-            return recipe
+            return null
         }
         val chosenFlavor = options.random()
+
         if(chosenFlavor == ai.endDrinkIndex){
-            return recipe
+            flavorOptions[base][flavors.toList()]?.remove(chosenFlavor)
+            return Drink(baseDrink = base, name = defaultName, ingredients = reformatFlavors(flavors))
         }
-        recipe.addFlavor(chosenFlavor)
-        return makeRandDrink(recipe)
+
+        val nextFlavors = flavors.copyOf()
+        nextFlavors[chosenFlavor]++
+        val nextDrink = makeRandDrink(base, nextFlavors)
+
+        if(nextDrink != null){
+            return nextDrink
+        }
+        //dead end reached, no unique drink can be made with this flavor, so remove it and try again.
+        flavorOptions[base][flavors.toList()]?.remove(chosenFlavor)
+        return makeRandDrink(base, flavors)
     }
 
     /**
-     * adds [drink] to the [base]'s list of available drinks
+     * retrieves the AI recommended flavors for a drink with [base] and [flavors]. Caches all AI recommendations for
+     * faster retrieval
      */
-    private fun addDrink(base: Int, drink: Recipe){
+    private fun getOptions(base: Int, flavors: IntArray): MutableList<Int>{
+        val flavorMap = flavorOptions[base]
+        val options = flavorMap[flavors.toList()]
+        if(options == null){
+            val options = ai.generateDrink(base, flavors).toMutableList()
+            flavorMap[flavors.toList()] = options
+            return options
+        }
+        return options
+    }
+
+    /**
+     * adds [drink] to the [base]'s list of available drinks.
+     */
+    private fun addDrink(base: Int, drink: Drink){
         _drinks.value = List(_drinks.value.size){
             if(it == base){
                 drinks.value[it] + drink
@@ -86,5 +107,17 @@ class GenerateDrinksViewModel @Inject constructor(private val ai: TensorFlowAPI)
                 drinks.value[it]
             }
         }
+    }
+
+    /**
+     * reformats a list of [flavors], containing the quantity of ALL ingredients, and converts it to a format that the
+     * Drink class expects
+     */
+    private fun reformatFlavors(flavors: IntArray): SnapshotStateList<Pair<Int, Int>>{
+        val reformatedFlavors: MutableList<Pair<Int, Int>> = mutableListOf()
+        flavors.forEachIndexed{ index, quantity ->
+            if(quantity >= 1) reformatedFlavors.add(Pair(index, quantity))
+        }
+        return reformatedFlavors.toMutableStateList()
     }
 }
