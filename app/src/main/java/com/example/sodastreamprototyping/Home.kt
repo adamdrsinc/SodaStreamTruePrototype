@@ -39,7 +39,7 @@ fun Home(navController: NavController, onDrinkEdit: (Drink?) -> Unit) {
             when (selectedTabIndex) {
                 0 -> MenuPage()
                 1 -> MyDrinksPage(navController, onDrinkEdit)
-                2 -> GenerateDrinksPage()
+                2 -> GenerateDrinksPage(onDrinkEdit)
             }
         }
     }

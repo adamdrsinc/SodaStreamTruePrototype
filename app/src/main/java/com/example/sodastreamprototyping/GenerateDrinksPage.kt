@@ -1,5 +1,6 @@
 package com.example.sodastreamprototyping
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,7 +38,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GenerateDrinksPage() {
+fun GenerateDrinksPage(onDrinkSelected: (Drink) -> Unit) {
     val viewModel : GenerateDrinksViewModel = hiltViewModel()
     val drinks by viewModel.drinks.collectAsState()
 
@@ -74,6 +75,9 @@ fun GenerateDrinksPage() {
                                 .width(180.dp)
                                 .height(220.dp)
                                 .padding(5.dp)
+                                .clickable(){
+                                    onDrinkSelected(recipe)
+                                }
                         ) {
                             Column(Modifier.padding(8.dp)) {
                                 Text(baseArray[recipe.baseDrink], fontWeight = FontWeight.Bold)
