@@ -106,6 +106,10 @@ fun EditDrinkPage(navController: NavController, drink: Drink?) {
             )
             Spacer(modifier = Modifier.height(18.dp))
 
+            SectionTitle("Ice Quantity")
+            IceQuantitySlider(drinkCopy)
+            Spacer(modifier = Modifier.height(18.dp))
+
             // TextField to change the drink name
             SectionTitle("Drink Name")
             TextField(
@@ -124,10 +128,6 @@ fun EditDrinkPage(navController: NavController, drink: Drink?) {
             // Display current selections
             SectionTitle("Current Drink Summary")
             CurrentDrinkSummary(newDrink = drinkCopy, ingredientsState = ingredientsState)
-            Spacer(modifier = Modifier.height(18.dp))
-
-            SectionTitle("Ice Quantity")
-            IceQuantitySlider(drinkCopy)
             Spacer(modifier = Modifier.height(18.dp))
 
             // Save button
@@ -434,25 +434,6 @@ fun DropdownMenuDrinkBases(drink: Drink?) {
             }
         }
     }
-}
-
-@Composable
-fun TitleTextTitle(text: String, bold: Boolean = false) {
-    Text(
-        text = text,
-        fontSize = 24.sp,
-        modifier = Modifier.padding(bottom = 16.dp),
-        fontWeight = if(bold) FontWeight.Bold else FontWeight.Normal
-    )
-}
-
-@Composable
-fun TitleTextSubtitle(text: String) {
-    Text(
-        text = text,
-        fontSize = 20.sp,
-        modifier = Modifier.padding(bottom = 16.dp)
-    )
 }
 
 fun incrementIngredient(
