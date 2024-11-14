@@ -1,8 +1,14 @@
 package com.example.sodastreamprototyping
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,21 +22,20 @@ import androidx.navigation.NavController
 
 @Composable
 fun MyDrinksPage(navController: NavController, onCreateDrink: (Drink?) -> Unit) {
-    Spacer(modifier = Modifier.height(16.dp))
-
+    val scrollState = rememberScrollState()
     val context = LocalContext.current
     val drinkBases = context.resources.getStringArray(R.array.drink_bases)
     val drinkIngredients = context.resources.getStringArray(R.array.drink_flavors)
 
-    var ingList1 : SnapshotStateList<Pair<Int, Int>> = mutableStateListOf(
+    var ingList1: SnapshotStateList<Pair<Int, Int>> = mutableStateListOf(
         Pair(0, 1),
         Pair(1, 1)
     )
-    var ingList2 : SnapshotStateList<Pair<Int, Int>> = mutableStateListOf(
+    var ingList2: SnapshotStateList<Pair<Int, Int>> = mutableStateListOf(
         Pair(2, 1),
         Pair(3, 1)
     )
-    var ingList3 : SnapshotStateList<Pair<Int, Int>> = mutableStateListOf(
+    var ingList3: SnapshotStateList<Pair<Int, Int>> = mutableStateListOf(
         Pair(4, 1),
         Pair(5, 1)
     )
@@ -45,30 +50,35 @@ fun MyDrinksPage(navController: NavController, onCreateDrink: (Drink?) -> Unit) 
         drink3
     )
 
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .verticalScroll(scrollState)
+                .fillMaxWidth()
+                .padding(bottom = 56.dp) // Add padding to avoid overlap with the button
+        ) {
+            drinks.forEach { drink ->
+                DrinkCard(drink)
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
         CreateDrinkButton(
             navController = navController,
-            editDrinkNavigaton = onCreateDrink
-
+            editDrinkNavigaton = onCreateDrink,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(16.dp)
         )
-        Spacer(modifier = Modifier.height(16.dp))
-
-        drinks.forEach { drink ->
-            DrinkCard(drink)
-            Spacer(modifier = Modifier.height(16.dp))
-        }
     }
-
 }
 
 @Composable
-fun CreateDrinkButton(navController: NavController, editDrinkNavigaton: (Drink?) -> Unit){
+fun CreateDrinkButton(navController: NavController, editDrinkNavigaton: (Drink?) -> Unit, modifier: Modifier = Modifier) {
     Button(
-        onClick = {editDrinkNavigaton(null)}
-    ){
+        onClick = { editDrinkNavigaton(null) },
+        modifier = modifier
+    ) {
         Text(
             text = "Create Drink"
         )
