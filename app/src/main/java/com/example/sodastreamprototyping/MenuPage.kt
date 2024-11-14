@@ -36,9 +36,9 @@ fun MenuPage() {
         Pair(5, 1)
     )
 
-    var drink1 = Drink(ingList1, name = "Strawberry Creamer", price = 2.99, quantity = 1, isCustom = false, baseDrink = 0)
-    var drink2 = Drink(ingList2, name = "Something Something", price = 2.99, quantity = 1, isCustom = false, iceQuantity = 5, baseDrink = 1)
-    var drink3 = Drink(ingList3, name = "Other Thing", price = 2.99, quantity = 1, isCustom = false, iceQuantity = 3, baseDrink = 2)
+    var drink1 = Drink(ingList1, name = "Strawberry Creamer", quantity = 1, isCustom = false, baseDrink = 0)
+    var drink2 = Drink(ingList2, name = "Something Something",quantity = 1, isCustom = false, iceQuantity = 5, baseDrink = 1)
+    var drink3 = Drink(ingList3, name = "Other Thing", quantity = 1, isCustom = false, iceQuantity = 3, baseDrink = 2)
 
     val drinks = listOf(
         drink1,
@@ -78,7 +78,8 @@ fun DrinkCard(drink: Drink) {
             ) {
                 Text(text = drink.name, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(text = drink.price.toString(), fontSize = 16.sp, fontWeight = FontWeight.Medium)
+//                Text(text = drink.getPrice().toString(), fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                Text(text = "$%.2f".format(drink.getPrice()), fontSize = 16.sp, fontWeight = FontWeight.Medium)
                 Spacer(modifier = Modifier.height(4.dp))
 
                 if(drink.description != null){

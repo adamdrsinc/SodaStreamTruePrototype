@@ -28,12 +28,11 @@ import com.example.practice.ApiRequestHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditDrinkPage(navController: NavController, drinkID: Int?) {
+fun EditDrinkPage(navController: NavController, drink: Drink?) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
 
-    var drink = Basket.getDrinks().find { it.drinkID == drinkID }
     var buttonText = "Save Changes"
     var titleText: String = "Edit Drink"
 
@@ -136,10 +135,8 @@ fun EditDrinkPage(navController: NavController, drinkID: Int?) {
                     drinkCopy.price = calculateDrinkPrice(drinkCopy)
 
                     // Save changes to the drink
-                    if(Basket.getDrinks().find { it.drinkID == drinkID } == null){
+                    if(Basket.getDrinks().find { it.drinkID == drink?.drinkID } == null){
                         Basket.addDrink(drinkCopy)
-                    }else{
-                        drink = drinkCopy
                     }
                     navController.popBackStack()
                 },
