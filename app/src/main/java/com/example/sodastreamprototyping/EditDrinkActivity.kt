@@ -50,7 +50,7 @@ fun EditDrinkPage(navController: NavController, drinkID: Int?) {
     //TODO: Get drink flavors from DB, not from resources
     val drinkFlavors = context.resources.getStringArray(R.array.drink_flavors)
     //TODO: Replace above line with the code below
-    /*var drinkFlavorsFromDB: List<String> = listOf()
+    var drinkFlavorsFromDB: List<String> = listOf()
     ApiRequestHelper.fetchIngredients(
         context = context,
         onSuccess = { ingredients ->
@@ -59,7 +59,7 @@ fun EditDrinkPage(navController: NavController, drinkID: Int?) {
         onError = { error ->
             Toast.makeText(context, "Error fetching ingredients: $error", Toast.LENGTH_SHORT).show()
         }
-    )*/
+    )
 
 
     val ingredientsState = remember { drinkCopy.ingredients }

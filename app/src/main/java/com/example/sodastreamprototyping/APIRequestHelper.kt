@@ -16,7 +16,13 @@ class ApiRequestHelper {
         private const val BASE_URL = "http://10.0.2.2:8080"
 
         // Function to handle login request
-        fun makeLoginRequest(context: Context, username: String, password: String, onSuccess: (JSONObject) -> Unit, onError: (String) -> Unit) {
+        fun makeLoginRequest(
+            context: Context,
+            username: String,
+            password: String,
+            onSuccess: (JSONObject) -> Unit,
+            onError: (String) -> Unit)
+        {
             val url = "$BASE_URL/auth/authenticate"
 
             // Create JSON object for request parameters
@@ -137,7 +143,7 @@ class ApiRequestHelper {
             onSuccess: (List<String>) -> Unit,
             onError: (String) -> Unit
         ) {
-            val url = "${ApiRequestHelper.Companion.BASE_URL}/ingredients"
+            val url = "${BASE_URL}/inventory/all"
 
             val jsonObjectRequest = JsonObjectRequest(
                 Request.Method.GET, url, null,

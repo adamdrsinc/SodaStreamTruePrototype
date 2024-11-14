@@ -45,8 +45,3 @@ fun Home(navController: NavController) {
     }
 }
 
-@Composable
-fun MyDrinksPage() {
-    TODO("Not yet implemented")
-}
-
