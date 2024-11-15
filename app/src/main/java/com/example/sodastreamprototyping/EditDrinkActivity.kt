@@ -9,7 +9,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
 import android.widget.Toast
@@ -20,53 +19,30 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.sodastreamprototyping.viewModel.EditDrinkViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditDrinkPage(navController: NavController, drink: Drink?) {
+fun EditDrinkPage(navController: NavController, drink: Drink) {
+
     val context = LocalContext.current
     val scrollState = rememberScrollState()
-
+    val editDrinkViewModel : EditDrinkViewModel = viewModel(factory = EditDrinkViewModel.Factory(drink.copy()))
+    val newDrink by editDrinkViewModel.drink.collectAsState()
 
     var buttonText = "Save Changes"
     var titleText: String = "Edit Drink"
 
-    if(drink == null){
+    if(drink.drinkID == null){
         titleText = "New Drink"
         buttonText = "Add Drink"
     }
 
-    var drinkCopy = drink
-    if(drinkCopy == null) {
-        drinkCopy = remember { Drink(name = "New Drink", isCustom = true, ingredients = mutableStateListOf<Pair<Int, Int>>()) }
-    }
-
     //TODO: Get drink flavors from DB, not from resources
     val drinkFlavors = context.resources.getStringArray(R.array.drink_flavors)
-    //TODO: Replace above line with the code below
-    /*var drinkFlavorsFromDB: List<String> = listOf()
-    ApiRequestHelper.fetchIngredients(
-        context = context,
-        onSuccess = { ingredients ->
-            drinkFlavorsFromDB = ingredients
-        },
-        onError = { error ->
-            Toast.makeText(context, "Error fetching ingredients: $error", Toast.LENGTH_SHORT).show()
-        }
-    )*/
-
-
-    val ingredientsState = remember { drinkCopy.ingredients }
-    var drinkQuantity = remember { drinkCopy.quantity }
-    var drinkName by remember { mutableStateOf(drinkCopy.name) }
-
-    // LaunchedEffect to observe changes in ingredientsState
-    LaunchedEffect(ingredientsState) {
-        // Trigger recomposition when ingredientsState changes
-    }
 
     MainLayout(navController = navController) { innerPadding ->
         Column(
@@ -83,37 +59,23 @@ fun EditDrinkPage(navController: NavController, drink: Drink?) {
 
             //Drink Bases Dropdown
             TitleText("Bases")
-            DropdownMenuDrinkBases(drinkCopy)
+            DropdownMenuDrinkBases(newDrink){editDrinkViewModel.setBase(it)}
             Spacer(modifier = Modifier.height(16.dp))
 
             // Accordion for ingredients
             TitleText("Ingredients")
-            AccordionSectionIngredientRow(
-                title = "Ingredients",
-                items = drinkFlavors,
-                newDrink = drinkCopy,
-                ingredientsState = ingredientsState
-            )
-            //TODO: Replace above accordion with following code when syrup retrieval implemented.
-            /*if(drinkFlavorsFromDB.isEmpty()){
-                Text("Ingredients could not be retrieved.")
-            }else{
-                AccordionSectionIngredientRow(
-                    title = "Ingredients",
-                    items = drinkFlavors,
-                    newDrink = drinkCopy,
-                    ingredientsState = ingredientsState
-                )
-            }*/
+            AccordionSectionIngredientRow(title = "Ingredients", items = drinkFlavors){
+                editDrinkViewModel.addIngredient(it)
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             // TextField to change the drink name
             TitleText("Drink Name")
             TextField(
-                value = drinkName,
+                value = newDrink.name,
                 onValueChange = {
-                    drinkName = it
-                    drinkCopy.name = it
+                    editDrinkViewModel.setName(it)
                 },
                 label = { Text("Drink Name") },
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
@@ -121,19 +83,17 @@ fun EditDrinkPage(navController: NavController, drink: Drink?) {
             Spacer(modifier = Modifier.height(16.dp))
 
             // Display current selections
-            CurrentDrinkSummary(newDrink = drinkCopy, ingredientsState = ingredientsState)
+            CurrentDrinkSummary(newDrink,
+                {editDrinkViewModel.addIngredient(it)}, {editDrinkViewModel.removeIngredient(it)})
             Spacer(modifier = Modifier.height(16.dp))
 
-            IceQuantitySlider(drinkCopy)
+            IceQuantitySlider(newDrink){editDrinkViewModel.setIce(it)}
             Spacer(modifier = Modifier.height(16.dp))
 
             // Save button
             Button(
                 onClick = {
-                    // Save changes to the drink
-                    if(Basket.getDrinks().find { it.drinkID == drink?.drinkID } == null){
-                        Basket.addDrink(drinkCopy)
-                    }
+                    editDrinkViewModel.saveDrink()
                     navController.popBackStack()
                 },
                 modifier = Modifier.fillMaxWidth()
@@ -145,7 +105,7 @@ fun EditDrinkPage(navController: NavController, drink: Drink?) {
 }
 
 @Composable
-fun AccordionSectionIngredientRow(title: String, items: Array<String>, newDrink: Drink, ingredientsState: SnapshotStateList<Pair<Int, Int>>) {
+fun AccordionSectionIngredientRow(title: String, items: Array<String>, selectFlavor: (Int) -> Boolean) {
     var expanded by remember { mutableStateOf(false) }
 
     Column(
@@ -168,12 +128,9 @@ fun AccordionSectionIngredientRow(title: String, items: Array<String>, newDrink:
             enter = expandVertically(),
             exit = shrinkVertically()
         ) {
-            Column(
-                //modifier = Modifier.verticalScroll(scrollState)
-                    //.height(200.dp) // Set a fixed height for the scrollable area
-            ) {
+            Column {
                 items.forEachIndexed { index, item ->
-                    IngredientRow(newDrink = newDrink, ingredient = Pair(index, item), ingredientsState = ingredientsState)
+                    IngredientRow(ingredient = Pair(index, item), false, selectFlavor)
                 }
             }
         }
@@ -181,20 +138,14 @@ fun AccordionSectionIngredientRow(title: String, items: Array<String>, newDrink:
 }
 
 @Composable
-fun IngredientRow(newDrink: Drink, ingredient: Pair<Int, String>, ingredientsState: SnapshotStateList<Pair<Int,
-        Int>>, aiRecommended: Boolean = false) {
+fun IngredientRow(ingredient: Pair<Int, String>, aiRecommended: Boolean = false, select: (Int) -> Boolean) {
     val context = LocalContext.current
 
     val modifier = Modifier
         .background(if (aiRecommended) Color.Yellow else Color.Transparent)
         .fillMaxWidth()
         .clickable {
-            val ingredientIncreased = incrementIngredient(
-                newDrink = newDrink,
-                ingredient = ingredient.first,
-                ingredientsState = ingredientsState
-            )
-            if (!ingredientIncreased) {
+            if (!select(ingredient.first) ) {
                 Toast.makeText(context, "Syrup count cannot exceed ${Drink.MAX_PUMP_COUNT}", Toast.LENGTH_SHORT).show()
             }
         }
@@ -213,7 +164,7 @@ fun IngredientRow(newDrink: Drink, ingredient: Pair<Int, String>, ingredientsSta
 }
 
 @Composable
-fun CurrentDrinkSummary(newDrink: Drink, ingredientsState: SnapshotStateList<Pair<Int, Int>>) {
+fun CurrentDrinkSummary(drink: Drink, increment: (Int) -> Boolean, decrement: (Int)-> Boolean) {
     val context = LocalContext.current
     val drinkFlavors = context.resources.getStringArray(R.array.drink_flavors)
 
@@ -223,20 +174,20 @@ fun CurrentDrinkSummary(newDrink: Drink, ingredientsState: SnapshotStateList<Pai
             .padding(16.dp)
     ) {
         Text(
-            text = "Current Drink: ${newDrink.name}",
+            text = "Current Drink: ${drink.name}",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        if (ingredientsState.isEmpty()) {
+        if (drink.ingredients.isEmpty()) {
             Text(
                 text = "No ingredients added yet.",
                 fontSize = 16.sp,
                 color = Color.Gray
             )
         } else {
-            ingredientsState.forEachIndexed { index, (ingredient, quantity) ->
+            drink.ingredients.forEachIndexed { index, (ingredient, quantity) ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -252,12 +203,7 @@ fun CurrentDrinkSummary(newDrink: Drink, ingredientsState: SnapshotStateList<Pai
                     // Decrement Button
                     IconButton(
                         onClick = {
-                            val decreasedIngredient = decrementIngredient(
-                                newDrink = newDrink,
-                                ingredient = ingredient,
-                                ingredientsState = ingredientsState
-                            )
-                            if (!decreasedIngredient) {
+                            if (!decrement(ingredient)) {
                                 Toast.makeText(context, "Syrup count cannot ${Drink.MAX_PUMP_COUNT}", Toast.LENGTH_SHORT).show()
                             }
                         }
@@ -276,12 +222,7 @@ fun CurrentDrinkSummary(newDrink: Drink, ingredientsState: SnapshotStateList<Pai
                     // Increment Button
                     IconButton(
                         onClick = {
-                            val increasedIngredient = incrementIngredient(
-                                newDrink = newDrink,
-                                ingredient = ingredient,
-                                ingredientsState = ingredientsState
-                            )
-                            if (!increasedIngredient) {
+                            if (!increment(ingredient)) {
                                 Toast.makeText(context, "Syrup count cannot exceed ${Drink.MAX_PUMP_COUNT}", Toast.LENGTH_SHORT).show()
                             }
                         }
@@ -295,16 +236,12 @@ fun CurrentDrinkSummary(newDrink: Drink, ingredientsState: SnapshotStateList<Pai
 }
 
 @Composable
-fun IceQuantitySlider(drink: Drink?) {
+fun IceQuantitySlider(drink: Drink, setIce:(Int)-> Unit) {
     val config = LocalConfiguration.current
     val screenWidth = config.screenWidthDp
 
-    if(drink == null){
-        return
-    }
-
-    // State to hold the slider position
-    val sliderPosition = remember { mutableStateOf(drink.iceQuantity.toFloat()) } // 0f to 1f range
+    // State to hold the slider position, can't be stored in drink since this is a float
+    val sliderPosition = remember { mutableFloatStateOf(drink.iceQuantity.toFloat()) }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -314,14 +251,14 @@ fun IceQuantitySlider(drink: Drink?) {
             .padding(16.dp)
     ) {
         // Text to display the current value of the slider
-        Text(text = "Ice amount: ${sliderPosition.value.toInt()}")
+        Text(text = "Ice amount: ${sliderPosition.floatValue.toInt()}")
 
         // Slider
         Slider(
-            value = sliderPosition.value,
+            value = sliderPosition.floatValue,
             onValueChange = { newValue ->
-                sliderPosition.value = newValue
-                drink.iceQuantity = newValue.toInt()
+                sliderPosition.floatValue = newValue
+                setIce(newValue.toInt())
             },
             valueRange = 0f..5f // Range of the slider
         )
@@ -330,7 +267,7 @@ fun IceQuantitySlider(drink: Drink?) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DropdownMenuDrinkBases(drink: Drink?){
+fun DropdownMenuDrinkBases(newDrink: Drink, selectBase: (Int) -> Unit){
     val context = LocalContext.current
 
     var isExpanded = remember{
@@ -339,25 +276,14 @@ fun DropdownMenuDrinkBases(drink: Drink?){
     var selectedText = remember{
         mutableStateOf("")
     }
-    var selectedOptionIndex = remember{
-        mutableIntStateOf(0)
-    }
-
     val drinkBases = context.resources.getStringArray(R.array.drink_bases)
-
-    var drinkIndex = drink?.baseDrink ?: -1
-    if(drinkIndex == -1){
-        return
-    }
-
-    selectedOptionIndex.intValue = drinkIndex
 
     ExposedDropdownMenuBox(
         expanded = isExpanded.value,
         onExpandedChange = {isExpanded.value = !isExpanded.value},
     ) {
         TextField(
-            value = drinkBases[selectedOptionIndex.intValue],
+            value = drinkBases[newDrink.baseDrink],
             onValueChange = {},
             readOnly = true,
             trailingIcon = {
@@ -380,17 +306,13 @@ fun DropdownMenuDrinkBases(drink: Drink?){
                     },
                     onClick = {
                         selectedText.value = baseName
-                        selectedOptionIndex.value = index
+                        selectBase(index)
                         isExpanded.value = false
-
-                        drink?.baseDrink = index
                     }
                 )
             }
         }
     }
-
-
 }
 
 @Composable
@@ -401,44 +323,3 @@ fun TitleText(text:  String){
         modifier = Modifier.padding(bottom = 16.dp)
     )
 }
-
-fun incrementIngredient(
-    newDrink: Drink,
-    ingredient: Int,
-    ingredientsState: SnapshotStateList<Pair<Int, Int>>
-): Boolean {
-    val existingIngredient = ingredientsState.find { it.first == ingredient }
-
-    if (newDrink.hasIngredient(ingredient) != null) {
-        if (newDrink.incrementIngredient(ingredient)) {
-            return true
-        } else {
-            return false
-        }
-    } else {
-        if (newDrink.addIngredient(ingredient)) {
-            return true
-        } else {
-            return false
-        }
-    }
-}
-
-fun decrementIngredient(
-    newDrink: Drink,
-    ingredient: Int,
-    ingredientsState: SnapshotStateList<Pair<Int, Int>>
-): Boolean {
-    val existingIngredient = ingredientsState.find { it.first == ingredient }
-
-    if (newDrink.hasIngredient(ingredient) != null) {
-        if (newDrink.decrementIngredient(ingredient)) {
-            return true
-        } else {
-            return false
-        }
-    } else {
-        return false
-    }
-}
-

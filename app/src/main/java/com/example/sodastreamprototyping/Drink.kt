@@ -24,6 +24,7 @@ data class Drink(
         const val MAX_PUMP_COUNT = 5
         const val BASE_PRICE = 2.00
         const val INGREDIENT_COST = 0.10
+        const val MAX_ICE = 5
     }
 
     init {
@@ -31,23 +32,16 @@ data class Drink(
             currentPumpCount += drinkIngredient.second
         }
 
-        drinkID = Basket.getNextDrinkID()
     }
 
     fun hasIngredient(ingredient: Int): Pair<Int, Int>? {
         return ingredients.find { it.first == ingredient }
     }
 
+    /**
+     * Increments [ingredient] if it exists, or adds it to the list if it doesn't
+     */
     fun addIngredient(ingredient: Int): Boolean {
-        if (currentPumpCount < MAX_PUMP_COUNT) {
-            ingredients.add(Pair(ingredient, 1))
-            currentPumpCount++
-            return true
-        }
-        return false
-    }
-
-    fun incrementIngredient(ingredient: Int): Boolean {
         val existingIngredient = hasIngredient(ingredient)
         if (existingIngredient != null && currentPumpCount < MAX_PUMP_COUNT) {
             val index = ingredients.indexOf(existingIngredient)
@@ -55,8 +49,9 @@ data class Drink(
             currentPumpCount++
             return true
         }
-        return false
+        return addNewIngredient(ingredient)
     }
+
 
     fun decrementIngredient(ingredient: Int): Boolean {
         val existingIngredient = hasIngredient(ingredient)
@@ -84,4 +79,18 @@ data class Drink(
         }
         return price
     }
+
+    /**
+     * Adds a new [ingredient] to the list of ingredients. For use with ingredients that haven't been added to the
+     * drink, not incrementing.
+     */
+    private fun addNewIngredient(ingredient: Int): Boolean {
+        if (currentPumpCount < MAX_PUMP_COUNT) {
+            ingredients.add(Pair(ingredient, 1))
+            currentPumpCount++
+            return true
+        }
+        return false
+    }
+
 }

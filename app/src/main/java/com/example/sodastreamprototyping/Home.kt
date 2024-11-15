@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
 @Composable
-fun Home(navController: NavController, onDrinkEdit: (Drink?) -> Unit) {
+fun Home(navController: NavController, onDrinkEdit: (Drink) -> Unit) {
     MainLayout(navController = navController) { innerPadding ->
         Column(
             modifier = Modifier

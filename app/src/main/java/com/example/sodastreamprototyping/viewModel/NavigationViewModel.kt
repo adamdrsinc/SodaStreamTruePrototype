@@ -8,6 +8,6 @@ import com.example.sodastreamprototyping.Drink
 
 class NavigationViewModel: ViewModel() {
 
-    var selectedDrink: Drink? by mutableStateOf(null)
+    var selectedDrink: Drink by mutableStateOf(Drink(name= "New Drink", baseDrink = 0))
 
 }
