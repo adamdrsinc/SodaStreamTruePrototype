@@ -22,7 +22,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.sodastreamprototyping.SectionTitle
 import com.example.sodastreamprototyping.viewModel.EditDrinkViewModel
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.ui.text.style.TextAlign
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,13 +59,14 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
                 .padding(16.dp)
                 .verticalScroll(scrollState)
         ) {
-            //Title
-            TitleText(titleText)
+            // Title
+            SectionTitle(text = titleText, centered = true)
+            Spacer(modifier = Modifier.height(18.dp))
 
             //Drink Bases Dropdown
-            TitleText("Bases")
+            SectionTitle("Bases")
             DropdownMenuDrinkBases(newDrink){editDrinkViewModel.setBase(it)}
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(18.dp))
 
             // Accordion for ingredients
             TitleText("Ingredients")
@@ -68,27 +74,31 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
                 editDrinkViewModel.addIngredient(it)
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(18.dp))
+
+            SectionTitle("Ice Quantity")
+            IceQuantitySlider(newDrink){editDrinkViewModel.setIce(it)}
+            Spacer(modifier = Modifier.height(18.dp))
 
             // TextField to change the drink name
-            TitleText("Drink Name")
+            SectionTitle("Drink Name")
             TextField(
                 value = newDrink.name,
                 onValueChange = {
                     editDrinkViewModel.setName(it)
                 },
                 label = { Text("Drink Name") },
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(18.dp))
 
             // Display current selections
+            SectionTitle("Current Drink Summary")
             CurrentDrinkSummary(newDrink,
                 {editDrinkViewModel.addIngredient(it)}, {editDrinkViewModel.removeIngredient(it)})
-            Spacer(modifier = Modifier.height(16.dp))
-
-            IceQuantitySlider(newDrink){editDrinkViewModel.setIce(it)}
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(18.dp))
 
             // Save button
             Button(
@@ -96,12 +106,29 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
                     editDrinkViewModel.saveDrink()
                     navController.popBackStack()
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
             ) {
                 Text(buttonText)
             }
         }
     }
+}
+
+@Composable
+fun SectionTitle(text: String, color: Color = Color.LightGray,
+                 centered: Boolean = false) {
+    Text(
+        text = text,
+        fontSize = 22.sp,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .background(color)
+            .padding(8.dp),
+        textAlign = if (centered) TextAlign.Center else TextAlign.Start
+    )
 }
 
 @Composable
@@ -112,27 +139,45 @@ fun AccordionSectionIngredientRow(title: String, items: Array<String>, selectFla
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
+            .clickable { expanded = !expanded }
     ) {
-        Text(
-            text = title,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { expanded = !expanded }
                 .padding(vertical = 8.dp)
-        )
+        ) {
+            Text(
+                text = title,
+                fontSize = 20.sp,
+                modifier = Modifier.weight(1f)
+            )
+            Icon(
+                imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                contentDescription = if (expanded) "Collapse" else "Expand"
+            )
+        }
 
         AnimatedVisibility(
             visible = expanded,
             enter = expandVertically(),
             exit = shrinkVertically()
         ) {
-            Column {
-                items.forEachIndexed { index, item ->
-                    IngredientRow(ingredient = Pair(index, item), false, selectFlavor)
+            if(!items.isEmpty()){
+                Column {
+                    items.forEachIndexed { index, item ->
+                        IngredientRow(ingredient = Pair(index, item), false, selectFlavor)
+                    }
                 }
             }
+            else {
+                Column {
+                    Text(
+                        text = "Ingredients could not be retrieved. Refresh the app.",
+                        textAlign = TextAlign.Center
+                        )
+                }
+
         }
     }
 }
@@ -247,7 +292,7 @@ fun IceQuantitySlider(drink: Drink, setIce:(Int)-> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         modifier = Modifier
-            .width((screenWidth * 0.80).dp)
+            .fillMaxWidth()
             .padding(16.dp)
     ) {
         // Text to display the current value of the slider
@@ -270,17 +315,19 @@ fun IceQuantitySlider(drink: Drink, setIce:(Int)-> Unit) {
 fun DropdownMenuDrinkBases(newDrink: Drink, selectBase: (Int) -> Unit){
     val context = LocalContext.current
 
-    var isExpanded = remember{
+    var isExpanded = remember {
         mutableStateOf(false)
     }
-    var selectedText = remember{
+    var selectedText = remember {
         mutableStateOf("")
     }
     val drinkBases = context.resources.getStringArray(R.array.drink_bases)
 
     ExposedDropdownMenuBox(
         expanded = isExpanded.value,
-        onExpandedChange = {isExpanded.value = !isExpanded.value},
+        onExpandedChange = { isExpanded.value = !isExpanded.value },
+        modifier = Modifier
+            .fillMaxWidth()
     ) {
         TextField(
             value = drinkBases[newDrink.baseDrink],
@@ -296,10 +343,9 @@ fun DropdownMenuDrinkBases(newDrink: Drink, selectBase: (Int) -> Unit){
 
         ExposedDropdownMenu(
             expanded = isExpanded.value,
-            onDismissRequest = {isExpanded.value = false},
+            onDismissRequest = { isExpanded.value = false }
         ) {
-            drinkBases.forEachIndexed {
-                    index, baseName ->
+            drinkBases.forEachIndexed { index, baseName ->
                 DropdownMenuItem(
                     text = {
                         Text(text = baseName)
@@ -313,13 +359,4 @@ fun DropdownMenuDrinkBases(newDrink: Drink, selectBase: (Int) -> Unit){
             }
         }
     }
-}
-
-@Composable
-fun TitleText(text:  String){
-    Text(
-        text = text,
-        fontSize = 24.sp,
-        modifier = Modifier.padding(bottom = 16.dp)
-    )
 }

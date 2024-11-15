@@ -45,8 +45,3 @@ fun Home(navController: NavController, onDrinkEdit: (Drink) -> Unit) {
     }
 }
 
-@Composable
-fun MyDrinksPage() {
-    TODO("Not yet implemented")
-}
-

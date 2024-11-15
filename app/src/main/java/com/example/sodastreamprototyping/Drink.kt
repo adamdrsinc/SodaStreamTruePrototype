@@ -22,7 +22,8 @@ data class Drink(
     var currentPumpCount = 0
 
     companion object {
-        const val MAX_PUMP_COUNT = 5
+        const val MAX_PUMP_COUNT = 10
+        const val FREE_PUMP_COUNT = 4
         const val BASE_PRICE = 2.00
         const val INGREDIENT_COST = 0.10
         const val MAX_ICE = 5
@@ -78,9 +79,12 @@ data class Drink(
      */
     fun getPrice(): Double{
         var price = BASE_PRICE
-        for(ingredient in ingredients){
-            price += INGREDIENT_COST * ingredient.second
+
+        val ingredientCount = ingredients.size
+        if(ingredientCount > FREE_PUMP_COUNT){
+            price += INGREDIENT_COST * (ingredientCount - FREE_PUMP_COUNT)
         }
+
         return price
     }
 
