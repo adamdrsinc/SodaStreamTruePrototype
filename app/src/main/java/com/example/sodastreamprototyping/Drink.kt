@@ -9,7 +9,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
  * provided by default.
  */
 data class Drink(
-    val ingredients: SnapshotStateList<Pair<Int, Int>> = mutableStateListOf(),
+    val ingredients: MutableList<Pair<Int, Int>> = mutableListOf<Pair<Int, Int>>(),
     var name: String,
     var quantity: Int = 1,
     var iceQuantity: Int = 0,
