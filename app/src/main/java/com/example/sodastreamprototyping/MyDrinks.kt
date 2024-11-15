@@ -21,28 +21,30 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
 @Composable
-fun MyDrinksPage(navController: NavController, onCreateDrink: (Drink?) -> Unit) {
+fun MyDrinksPage(navController: NavController, onCreateDrink: (Drink) -> Unit) {
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     val drinkBases = context.resources.getStringArray(R.array.drink_bases)
     val drinkIngredients = context.resources.getStringArray(R.array.drink_flavors)
 
-    var ingList1: SnapshotStateList<Pair<Int, Int>> = mutableStateListOf(
+    var ingList1 : List<Pair<Int, Int>> = listOf(
         Pair(0, 1),
         Pair(1, 1)
     )
-    var ingList2: SnapshotStateList<Pair<Int, Int>> = mutableStateListOf(
+    var ingList2 : List<Pair<Int, Int>> = listOf(
         Pair(2, 1),
         Pair(3, 1)
     )
-    var ingList3: SnapshotStateList<Pair<Int, Int>> = mutableStateListOf(
+    var ingList3 : List<Pair<Int, Int>> = listOf(
         Pair(4, 1),
         Pair(5, 1)
     )
 
-    var drink1 = Drink(ingList1, name = "Custom Drink 1", quantity = 1, isCustom = true, baseDrink = 0)
-    var drink2 = Drink(ingList2, name = "Custom Drink 2", quantity = 1, isCustom = true, iceQuantity = 5, baseDrink = 1)
-    var drink3 = Drink(ingList3, name = "Custom Drink 3", quantity = 1, isCustom = true, iceQuantity = 3, baseDrink = 2)
+    var drink1 = Drink(ingList1.toMutableList(), name = "Custom Drink 1", quantity = 1, isCustom = true, baseDrink = 0)
+    var drink2 = Drink(ingList2.toMutableList(),
+        name = "Custom Drink 2", quantity = 1, isCustom = true, iceQuantity = 5, baseDrink = 1)
+    var drink3 = Drink(ingList3.toMutableList(),
+        name = "Custom Drink 3", quantity = 1, isCustom = true, iceQuantity = 3, baseDrink = 2)
 
     val drinks = listOf(
         drink1,
@@ -74,11 +76,11 @@ fun MyDrinksPage(navController: NavController, onCreateDrink: (Drink?) -> Unit) 
 }
 
 @Composable
-fun CreateDrinkButton(navController: NavController, editDrinkNavigaton: (Drink?) -> Unit, modifier: Modifier = Modifier) {
+fun CreateDrinkButton(navController: NavController, editDrinkNavigaton: (Drink) -> Unit, modifier: Modifier = Modifier) {
     Button(
-        onClick = { editDrinkNavigaton(null) },
+        onClick = {editDrinkNavigaton(Drink(name = "new Drink", baseDrink = 0))} ,
         modifier = modifier
-    ) {
+    ){
         Text(
             text = "Create Drink"
         )

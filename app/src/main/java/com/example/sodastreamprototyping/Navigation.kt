@@ -15,7 +15,7 @@ fun Navigation(startDestination: String)
     val viewModel : NavigationViewModel = viewModel()
 
 
-    fun navigateToEditDrink(drink: Drink?) {
+    fun navigateToEditDrink(drink: Drink) {
         viewModel.selectedDrink = drink
         navController.navigate(Screen.Edit.route)
     }
