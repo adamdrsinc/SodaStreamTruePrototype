@@ -1,33 +1,32 @@
 package com.example.sodastreamprototyping
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalConfiguration
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.sodastreamprototyping.SectionTitle
-import com.example.sodastreamprototyping.viewModel.EditDrinkViewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.example.sodastreamprototyping.viewModel.EditDrinkViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,13 +34,13 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
 
     val context = LocalContext.current
     val scrollState = rememberScrollState()
-    val editDrinkViewModel : EditDrinkViewModel = viewModel(factory = EditDrinkViewModel.Factory(drink.copy()))
+    val editDrinkViewModel: EditDrinkViewModel = viewModel(factory = EditDrinkViewModel.Factory(drink.copy()))
     val newDrink by editDrinkViewModel.drink.collectAsState()
 
     var buttonText = "Save Changes"
     var titleText: String = "Edit Drink"
 
-    if(drink.drinkID == null){
+    if (drink.drinkID == null) {
         titleText = "New Drink"
         buttonText = "Add Drink"
     }
@@ -65,19 +64,19 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
 
             //Drink Bases Dropdown
             SectionTitle("Bases")
-            DropdownMenuDrinkBases(newDrink){editDrinkViewModel.setBase(it)}
+            DropdownMenuDrinkBases(newDrink) { editDrinkViewModel.setBase(it) }
             Spacer(modifier = Modifier.height(18.dp))
 
             // Accordion for ingredients
-            TitleText("Ingredients")
-            AccordionSectionIngredientRow(title = "Ingredients", items = drinkFlavors){
+            SectionTitle("Ingredients")
+            AccordionSectionIngredientRow(title = "Ingredients", items = drinkFlavors) {
                 editDrinkViewModel.addIngredient(it)
             }
 
             Spacer(modifier = Modifier.height(18.dp))
 
             SectionTitle("Ice Quantity")
-            IceQuantitySlider(newDrink){editDrinkViewModel.setIce(it)}
+            IceQuantitySlider(newDrink) { editDrinkViewModel.setIce(it) }
             Spacer(modifier = Modifier.height(18.dp))
 
             // TextField to change the drink name
@@ -97,7 +96,7 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
             // Display current selections
             SectionTitle("Current Drink Summary")
             CurrentDrinkSummary(newDrink,
-                {editDrinkViewModel.addIngredient(it)}, {editDrinkViewModel.removeIngredient(it)})
+                { editDrinkViewModel.addIngredient(it) }, { editDrinkViewModel.removeIngredient(it) })
             Spacer(modifier = Modifier.height(18.dp))
 
             // Save button
@@ -116,8 +115,10 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
 }
 
 @Composable
-fun SectionTitle(text: String, color: Color = Color.LightGray,
-                 centered: Boolean = false) {
+fun SectionTitle(
+    text: String, color: Color = Color.LightGray,
+    centered: Boolean = false
+) {
     Text(
         text = text,
         fontSize = 22.sp,
@@ -163,21 +164,21 @@ fun AccordionSectionIngredientRow(title: String, items: Array<String>, selectFla
             enter = expandVertically(),
             exit = shrinkVertically()
         ) {
-            if(!items.isEmpty()){
+            if (!items.isEmpty()) {
                 Column {
                     items.forEachIndexed { index, item ->
                         IngredientRow(ingredient = Pair(index, item), false, selectFlavor)
                     }
                 }
-            }
-            else {
+            } else {
                 Column {
                     Text(
                         text = "Ingredients could not be retrieved. Refresh the app.",
                         textAlign = TextAlign.Center
-                        )
+                    )
                 }
 
+            }
         }
     }
 }
@@ -190,8 +191,10 @@ fun IngredientRow(ingredient: Pair<Int, String>, aiRecommended: Boolean = false,
         .background(if (aiRecommended) Color.Yellow else Color.Transparent)
         .fillMaxWidth()
         .clickable {
-            if (!select(ingredient.first) ) {
-                Toast.makeText(context, "Syrup count cannot exceed ${Drink.MAX_PUMP_COUNT}", Toast.LENGTH_SHORT).show()
+            if (!select(ingredient.first)) {
+                Toast
+                    .makeText(context, "Syrup count cannot exceed ${Drink.MAX_PUMP_COUNT}", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
         .padding(16.dp)
@@ -209,7 +212,7 @@ fun IngredientRow(ingredient: Pair<Int, String>, aiRecommended: Boolean = false,
 }
 
 @Composable
-fun CurrentDrinkSummary(drink: Drink, increment: (Int) -> Boolean, decrement: (Int)-> Boolean) {
+fun CurrentDrinkSummary(drink: Drink, increment: (Int) -> Boolean, decrement: (Int) -> Boolean) {
     val context = LocalContext.current
     val drinkFlavors = context.resources.getStringArray(R.array.drink_flavors)
 
@@ -249,7 +252,11 @@ fun CurrentDrinkSummary(drink: Drink, increment: (Int) -> Boolean, decrement: (I
                     IconButton(
                         onClick = {
                             if (!decrement(ingredient)) {
-                                Toast.makeText(context, "Syrup count cannot ${Drink.MAX_PUMP_COUNT}", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    context,
+                                    "Syrup count cannot ${Drink.MAX_PUMP_COUNT}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                     ) {
@@ -268,7 +275,11 @@ fun CurrentDrinkSummary(drink: Drink, increment: (Int) -> Boolean, decrement: (I
                     IconButton(
                         onClick = {
                             if (!increment(ingredient)) {
-                                Toast.makeText(context, "Syrup count cannot exceed ${Drink.MAX_PUMP_COUNT}", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    context,
+                                    "Syrup count cannot exceed ${Drink.MAX_PUMP_COUNT}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                     ) {
@@ -281,7 +292,7 @@ fun CurrentDrinkSummary(drink: Drink, increment: (Int) -> Boolean, decrement: (I
 }
 
 @Composable
-fun IceQuantitySlider(drink: Drink, setIce:(Int)-> Unit) {
+fun IceQuantitySlider(drink: Drink, setIce: (Int) -> Unit) {
     val config = LocalConfiguration.current
     val screenWidth = config.screenWidthDp
 
@@ -312,7 +323,7 @@ fun IceQuantitySlider(drink: Drink, setIce:(Int)-> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DropdownMenuDrinkBases(newDrink: Drink, selectBase: (Int) -> Unit){
+fun DropdownMenuDrinkBases(newDrink: Drink, selectBase: (Int) -> Unit) {
     val context = LocalContext.current
 
     var isExpanded = remember {

@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
 @Composable
-fun MyDrinksPage(navController: NavController, onCreateDrink: (Drink?) -> Unit) {
+fun MyDrinksPage(navController: NavController, onCreateDrink: (Drink) -> Unit) {
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     val drinkBases = context.resources.getStringArray(R.array.drink_bases)
@@ -76,7 +76,7 @@ fun MyDrinksPage(navController: NavController, onCreateDrink: (Drink?) -> Unit) 
 }
 
 @Composable
-fun CreateDrinkButton(navController: NavController, editDrinkNavigaton: (Drink?) -> Unit, modifier: Modifier = Modifier) {
+fun CreateDrinkButton(navController: NavController, editDrinkNavigaton: (Drink) -> Unit, modifier: Modifier = Modifier) {
     Button(
         onClick = {editDrinkNavigaton(Drink(name = "new Drink", baseDrink = 0))} ,
         modifier = modifier
