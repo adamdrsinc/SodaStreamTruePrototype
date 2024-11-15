@@ -2,11 +2,14 @@ package com.example.practice
 
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.example.sodastreamprototyping.Repository
 import org.json.JSONObject
 
 
@@ -14,6 +17,22 @@ class ApiRequestHelper {
 
     companion object {
         private const val BASE_URL = "http://10.0.2.2:8080"
+
+        /*
+        * Obtains all data for singletons etc. used in the app.
+        * */
+        fun retrieveAllNeededData(context: Context){
+            fetchIngredients(
+                context = context,
+                onSuccess = { ingredients ->
+                    Repository.drinkFlavorsFromDB = ingredients
+                },
+                onError = { error ->
+                    Toast.makeText(context, "Error fetching ingredients: $error", Toast.LENGTH_SHORT).show()
+                }
+            )
+        }
+
 
         // Function to handle login request
         fun makeLoginRequest(

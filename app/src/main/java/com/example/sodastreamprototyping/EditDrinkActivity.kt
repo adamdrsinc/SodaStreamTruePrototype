@@ -23,7 +23,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import com.example.practice.ApiRequestHelper
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
@@ -55,18 +54,8 @@ fun EditDrinkPage(navController: NavController, drink: Drink?) {
     }
 
     // TODO: Get drink flavors from DB, not from resources
-    val drinkFlavors = context.resources.getStringArray(R.array.drink_flavors)
-    // TODO: Replace above line with the code below
-
-    ApiRequestHelper.fetchIngredients(
-        context = context,
-        onSuccess = { ingredients ->
-            Repository.drinkFlavorsFromDB = ingredients
-        },
-        onError = { error ->
-            Toast.makeText(context, "Error fetching ingredients: $error", Toast.LENGTH_SHORT).show()
-        }
-    )
+    val drinkFlavors = context.resources.getStringArray(R.array.drink_flavors).toList()
+    //val drinkFlavors = Repository.drinkFlavorsFromDB
 
     val ingredientsState = remember { drinkCopy.ingredients }
     var drinkQuantity = remember { drinkCopy.quantity }
@@ -167,7 +156,7 @@ fun SectionTitle(text: String, color: Color = Color.LightGray,
 @Composable
 fun AccordionSectionIngredientRow(
     title: String,
-    items: Array<String>,
+    items: List<String>,
     newDrink: Drink,
     ingredientsState: SnapshotStateList<Pair<Int, Int>>
 ) {
@@ -201,15 +190,27 @@ fun AccordionSectionIngredientRow(
             enter = expandVertically(),
             exit = shrinkVertically()
         ) {
-            Column {
-                items.forEachIndexed { index, item ->
-                    IngredientRow(
-                        newDrink = newDrink,
-                        ingredient = Pair(index, item),
-                        ingredientsState = ingredientsState
-                    )
+            if(!items.isEmpty())
+            {
+                Column {
+                    items.forEachIndexed { index, item ->
+                        IngredientRow(
+                            newDrink = newDrink,
+                            ingredient = Pair(index, item),
+                            ingredientsState = ingredientsState
+                        )
+                    }
+                }
+            }else
+            {
+                Column {
+                    Text(
+                        text = "Ingredients could not be retrieved. Refresh the app.",
+                        textAlign = TextAlign.Center
+                        )
                 }
             }
+
         }
     }
 }
