@@ -69,7 +69,7 @@ fun DrinkCard(drink: Drink) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-                Basket.addDrink(drink.copy(ingredients = drink.ingredients.toMutableList()))
+                Basket.addDrink(drink.copy())
                 Toast.makeText(context, "${drink.name} added to basket.", Toast.LENGTH_SHORT).show()
             }
     ) {

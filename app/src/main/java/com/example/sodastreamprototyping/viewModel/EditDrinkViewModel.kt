@@ -25,19 +25,11 @@ class EditDrinkViewModel(startDrink: Drink): ViewModel() {
     }
 
     fun addIngredient(ingredientIndex: Int): Boolean{
-        if(_drink.value.addIngredient(ingredientIndex)){
-            _drink.value = _drink.value.copy() //seems redundant, but triggers a refresh
-            return true
-        }
-        return false
+        return _drink.value.addIngredient(ingredientIndex)
     }
 
     fun removeIngredient(ingredientIndex: Int): Boolean{
-        if(_drink.value.decrementIngredient(ingredientIndex)){
-            _drink.value = _drink.value.copy()
-            return true
-        }
-        return false
+        return _drink.value.decrementIngredient(ingredientIndex)
     }
 
     fun saveDrink(){

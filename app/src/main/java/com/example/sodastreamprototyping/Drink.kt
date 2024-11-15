@@ -2,6 +2,7 @@ package com.example.sodastreamprototyping
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.toMutableStateList
 
 /**
  * takes in a list of drinks of [ingredients], where the first value in the pair is the ingredient index, and the second
@@ -9,7 +10,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
  * provided by default.
  */
 data class Drink(
-    val ingredients: MutableList<Pair<Int, Int>> = mutableListOf<Pair<Int, Int>>(),
+    var ingredients: MutableList<Pair<Int, Int>> = mutableListOf<Pair<Int, Int>>(),
     var name: String,
     var quantity: Int = 1,
     var iceQuantity: Int = 0,
@@ -28,6 +29,9 @@ data class Drink(
     }
 
     init {
+        //ingredients must be a mutable state in order for ui changes to occur, calling this also creates copy,
+        // preventing two drinks from sharing the same list
+        ingredients = ingredients.toMutableStateList()
         for (drinkIngredient in ingredients) {
             currentPumpCount += drinkIngredient.second
         }
