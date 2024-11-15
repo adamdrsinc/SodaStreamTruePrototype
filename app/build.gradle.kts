@@ -85,10 +85,13 @@ dependencies {
     implementation(libs.tensorflow.lite.task.vision)
     implementation(libs.tensorflow.lite.gpu)
 
-    //hilt
+    // Hilt
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
     kapt(libs.hilt.android.compiler)
+
+    // DataStore
+    implementation(libs.androidx.datastore)
 }
 
 kapt {

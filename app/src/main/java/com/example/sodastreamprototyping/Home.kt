@@ -10,26 +10,36 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.sodastreamprototyping.viewModel.HomeViewModel
 
 @Composable
-fun Home(navController: NavController, onDrinkEdit: (Drink) -> Unit) {
+fun Home(navController: NavController, onDrinkEdit: (Drink) -> Unit)
+{
+    // stores current page to come back to
+    val context = LocalContext.current
+    val homeViewModel: HomeViewModel = viewModel(
+        factory = HomeViewModel.Factory(context)
+    )
+
+    val selectedTabIndex by homeViewModel.selectedTabIndex.collectAsState(initial = 0)
+    val tabs = listOf("Menu", "My Drinks", "Generate Drinks")
+
     MainLayout(navController = navController) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            var selectedTabIndex by remember { mutableStateOf(0) }
-            val tabs = listOf("Menu", "My Drinks", "Generate Drinks")
-
             TabRow(selectedTabIndex = selectedTabIndex) {
                 tabs.forEachIndexed { index, title ->
                     Tab(
                         text = { Text(title) },
                         selected = selectedTabIndex == index,
-                        onClick = { selectedTabIndex = index }
+                        onClick = { homeViewModel.setSelectedTab(index) }
                     )
                 }
             }
