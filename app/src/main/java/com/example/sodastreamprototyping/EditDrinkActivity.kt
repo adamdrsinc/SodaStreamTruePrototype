@@ -24,7 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.sodastreamprototyping.viewModel.EditDrinkViewModel
 
@@ -34,8 +34,12 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
 
     val context = LocalContext.current
     val scrollState = rememberScrollState()
-    val editDrinkViewModel: EditDrinkViewModel = viewModel(factory = EditDrinkViewModel.Factory(drink.copy()))
+//    val editDrinkViewModel: EditDrinkViewModel = viewModel(factory = EditDrinkViewModel.Factory(drink.copy()))
+    val editDrinkViewModel = hiltViewModel<EditDrinkViewModel, EditDrinkViewModel.Factory>(
+        creationCallback = { factory -> factory.create(drink = drink.copy()) }
+    )
     val newDrink by editDrinkViewModel.drink.collectAsState()
+    val suggestions by editDrinkViewModel.suggestion.collectAsState()
 
     var buttonText = "Save Changes"
     var titleText: String = "Edit Drink"
@@ -69,7 +73,7 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
 
             // Accordion for ingredients
             SectionTitle("Ingredients")
-            AccordionSectionIngredientRow(title = "Ingredients", items = drinkFlavors) {
+            AccordionSectionIngredientRow(title = "Ingredients", items = drinkFlavors, suggestions) {
                 editDrinkViewModel.addIngredient(it)
             }
 
@@ -133,7 +137,9 @@ fun SectionTitle(
 }
 
 @Composable
-fun AccordionSectionIngredientRow(title: String, items: Array<String>, selectFlavor: (Int) -> Boolean) {
+fun AccordionSectionIngredientRow(
+    title: String, items: Array<String>, suggestions: List<Int>, selectFlavor: (Int) -> Boolean
+) {
     var expanded by remember { mutableStateOf(false) }
 
     Column(
@@ -167,7 +173,7 @@ fun AccordionSectionIngredientRow(title: String, items: Array<String>, selectFla
             if (!items.isEmpty()) {
                 Column {
                     items.forEachIndexed { index, item ->
-                        IngredientRow(ingredient = Pair(index, item), false, selectFlavor)
+                        IngredientRow(ingredient = Pair(index, item), suggestions.contains(index), selectFlavor)
                     }
                 }
             } else {
