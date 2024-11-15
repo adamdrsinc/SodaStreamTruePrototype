@@ -12,12 +12,22 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        ApiRequestHelper.retrieveAllNeededData(this)
 
         setContent {
             MaterialTheme {
                 val isLoggedIn = UserPreferences.isLoggedIn(this@MainActivity)
-                val startDestination = if (isLoggedIn) Screen.Home.route else Screen.SignIn.route
+                val startDestination: String
+                if isLoggedIn {
+                    val refreshToken = UserPreferences.getRefreshToken(this@MainActivity)
+
+                    val accesToken = "" // Talk to Jakob about how to use the refresh token to get a new access token
+
+                    // Pass access token so all requests can use it for authentication
+                    ApiRequestHelper.retrieveAllNeededData(this, accessToken)
+                    startDestination = Screen.Home.route 
+                } else {
+                    startDestination = Screen.SignIn.route
+                }
                 Navigation(startDestination)
             }
         }

@@ -90,7 +90,8 @@ fun SignInScreen(
                             onSuccess = { response ->
                                 CoroutineScope(Dispatchers.Main).launch {
                                     Log.d("LOGIN_SUCCESS", response.toString())
-                                    UserPreferences.setLoggedIn(context, true)
+                                    // Send the refresh and access token to the user preferences so that it can be stored and re-used on each app open
+                                    UserPreferences.setLoggedIn(context, true, response.getString("access_token"), response.getString("refresh_token"))
                                     onSignInSuccess()
                                 }
                             },

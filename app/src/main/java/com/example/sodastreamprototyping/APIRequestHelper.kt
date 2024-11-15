@@ -184,7 +184,13 @@ class ApiRequestHelper {
                     Log.e("API_ERROR", error.toString())
                     onError(error.message ?: "An error occurred")
                 }
-            )
+            ) {
+                override fun getHeaders(): MutableMap<String, String> {
+                    val headers = HashMap<String, String>()
+                    headers["Auth-Bearer"] = ""// token goes here
+                    return headers
+                }
+            }
 
             val requestQueue: RequestQueue = Volley.newRequestQueue(context)
             requestQueue.add(jsonObjectRequest)
