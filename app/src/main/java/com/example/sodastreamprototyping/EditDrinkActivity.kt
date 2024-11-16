@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -192,8 +194,8 @@ fun AccordionSectionIngredientRow(
 fun IngredientRow(ingredient: Pair<Int, String>, aiRecommended: Boolean = false, select: (Int) -> Boolean) {
     val context = LocalContext.current
 
-    val modifier = Modifier
-        .background(if (aiRecommended) Color.Yellow.copy(alpha = 0.5f) else Color.Transparent)
+    val modifier = Modifier.background(Color.Gray.copy(alpha = 0.25f))
+//        .background(if (aiRecommended) Color.Blue.copy(alpha = 0.25f) else Color.Transparent)
         .fillMaxWidth()
         .clickable {
             if (!select(ingredient.first)) {
@@ -208,11 +210,18 @@ fun IngredientRow(ingredient: Pair<Int, String>, aiRecommended: Boolean = false,
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = ingredient.second,
-            fontSize = 16.sp,
-            modifier = Modifier.weight(1f)
-        )
+        Box(){
+            Text(
+                text = ingredient.second,
+                fontSize = 16.sp,
+                modifier = Modifier.padding(end = 20.dp, top=8.dp)
+            )
+            if(aiRecommended){
+//                Text("✨", fontSize = 16.sp, modifier = Modifier.align(Alignment.TopEnd))
+                Image(painter = painterResource(R.drawable.baseline_star_24), contentDescription = null, modifier =
+                Modifier.align(Alignment.TopEnd))
+            }
+        }
     }
 }
 
