@@ -12,6 +12,7 @@ import com.example.practice.ApiRequestHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import android.util.Log
 
 @Composable
 fun SignUpScreen(onSignInClick: () -> Unit) {
@@ -95,24 +96,38 @@ fun SignUpScreen(onSignInClick: () -> Unit) {
                 } else {
                     errorMessage = null
                     CoroutineScope(Dispatchers.IO).launch {
-                        ApiRequestHelper.makeSignUpRequest(
-                            context = context,
-                            firstname = firstname,
-                            lastname = lastname,
-                            username = username,
-                            email = email,
-                            password = password,
-                            onSuccess = {
-                                CoroutineScope(Dispatchers.Main).launch{
-                                    onSignInClick()
+                        try {
+                            ApiRequestHelper.makeSignUpRequest(
+                                context = context,
+                                firstname = firstname,
+                                lastname = lastname,
+                                username = username,
+                                email = email,
+                                password = password,
+                                onSuccess = {
+                                    CoroutineScope(Dispatchers.Main).launch {
+                                        Log.d("SIGNUP_SUCCESS", "User registered successfully")
+                                        onSignInClick()
+                                    }
+                                },
+                                onError = { error ->
+                                    CoroutineScope(Dispatchers.Main).launch {
+                                        errorMessage = when (error) {
+                                            "NetworkError" -> "Network error. Please check your connection."
+                                            "EmailInUse" -> "The email is already registered. Try logging in."
+                                            "UsernameTaken" -> "Username is taken. Please choose another."
+                                            else -> "An unexpected error occurred: $error"
+                                        }
+                                        Log.e("SIGNUP_ERROR", error)
+                                    }
                                 }
-                            },
-                            onError = { error ->
-                                CoroutineScope(Dispatchers.Main).launch {
-                                    errorMessage = error
-                                }
+                            )
+                        } catch (e: Exception) {
+                            CoroutineScope(Dispatchers.Main).launch {
+                                errorMessage = "An error occurred: ${e.localizedMessage}"
+                                Log.e("SIGNUP_EXCEPTION", e.toString())
                             }
-                        )
+                        }
                     }
                 }
             },

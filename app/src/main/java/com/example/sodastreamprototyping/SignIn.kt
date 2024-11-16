@@ -43,10 +43,6 @@ fun SignInScreen(
                 .padding(bottom = 32.dp)
         )
 
-        var username by remember { mutableStateOf("") }
-        var password by remember { mutableStateOf("") }
-        var errorMessage by remember { mutableStateOf<String?>(null) }
-
         OutlinedTextField(
             value = username,
             onValueChange = { username = it },
@@ -81,26 +77,37 @@ fun SignInScreen(
                 } else {
                     errorMessage = null
                     CoroutineScope(Dispatchers.IO).launch {
-                        ApiRequestHelper.makeLoginRequest(
-                            context = context,
-                            username = username,
-                            password = password,
-                            onSuccess = { response ->
-                                CoroutineScope(Dispatchers.Main).launch {
-                                    Log.d("LOGIN_SUCCESS", response.toString())
-                                    UserPreferences.setLoggedIn(context, true)
-                                    onSignInSuccess()
+                        try {
+                            ApiRequestHelper.makeLoginRequest(
+                                context = context,
+                                username = username,
+                                password = password,
+                                onSuccess = { response ->
+                                    CoroutineScope(Dispatchers.Main).launch {
+                                        Log.d("LOGIN_SUCCESS", response.toString())
+                                        UserPreferences.setLoggedIn(context, true)
+                                        onSignInSuccess()
+                                    }
+                                },
+                                onError = { error ->
+                                    CoroutineScope(Dispatchers.Main).launch {
+                                        errorMessage = when (error) {
+                                            "NetworkError" -> "Network error. Please check your connection."
+                                            "InvalidCredentials" -> "Incorrect username or password."
+                                            else -> "Incorrect username or password."
+                                        }
+                                        Log.e("LOGIN_ERROR", error)
+                                    }
                                 }
-                            },
-                            onError = { error ->
-                                CoroutineScope(Dispatchers.Main).launch {
-                                    errorMessage = error
-                                }
+                            )
+                        } catch (e: Exception) {
+                            CoroutineScope(Dispatchers.Main).launch {
+                                errorMessage = "An error occurred: ${e.localizedMessage}"
+                                Log.e("LOGIN_EXCEPTION", e.toString())
                             }
-                        )
+                        }
                     }
                 }
-
             },
             modifier = Modifier.fillMaxWidth()
         ) {

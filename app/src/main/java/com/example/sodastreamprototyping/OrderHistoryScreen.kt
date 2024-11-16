@@ -3,6 +3,8 @@ package com.example.sodastreamprototyping
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,11 +19,32 @@ data class Order(
 )
 
 @Composable
-fun OrderHistoryScreen(orders: List<Order>) {
+fun OrderHistoryScreen(
+    navController: NavController,
+    orders: List<Order>,
+    hasOpenOrders: MutableState<Boolean> // Pass openOrderCount as a state variable
+) {
     val openOrders = remember { orders.filter { it.status == "open" } }
     val closedOrders = remember { orders.filter { it.status == "closed" } }
 
+    hasOpenOrders.value = orders.any { it.status == "open" }
+
     Column(modifier = Modifier.fillMaxSize()) {
+        // Back button at the top left
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Start
+        ) {
+            Button(onClick = { navController.navigate("home") }) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back to Home"
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         OpenOrdersSection(openOrders)
         ClosedOrdersSection(closedOrders)
     }
@@ -74,13 +97,28 @@ fun OrderCard(order: Order, buttonText: String? = null, onClick: () -> Unit = {}
     }
 }
 
-// Sample data for testing
+// Sample usage with dynamic open order count
+@Composable
+fun MainWithOrderHistory(navController: NavController, orders: List<Order>) {
+    val hasOpenOrders = remember { mutableStateOf(false) }
+
+    MainLayout(navController = navController, hasOpenOrders = hasOpenOrders.value) {
+        OrderHistoryScreen(navController, orders, hasOpenOrders)
+    }
+}
+
 @Composable
 fun OrderHistoryScreenDemo(navController: NavController) {
+    // Define sample orders directly within the demo
     val sampleOrders = listOf(
         Order(id = 1, description = "Order #1", status = "open"),
         Order(id = 2, description = "Order #2", status = "closed"),
-        Order(id = 3, description = "Order #3", status = "closed")
+        Order(id = 3, description = "Order #3", status = "open")
     )
-    OrderHistoryScreen(orders = sampleOrders)
+
+    // Mutable state to keep track of open orders count
+    val hasOpenOrders = remember { mutableStateOf(false) }
+
+    // Pass sampleOrders to the OrderHistoryScreen for testing
+    OrderHistoryScreen(navController = navController, orders = sampleOrders, hasOpenOrders = hasOpenOrders)
 }

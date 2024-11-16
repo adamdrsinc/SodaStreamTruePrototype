@@ -9,7 +9,7 @@ import androidx.navigation.navArgument
 
 
 @Composable
-fun Navigation(startDestination: String)
+fun Navigation(startDestination: String, orders: List<Order>)
 {
     val navController = rememberNavController();
 
@@ -27,7 +27,7 @@ fun Navigation(startDestination: String)
             )
         }
         composable(route = Screen.Home.route) {
-            Home(navController = navController)
+            Home(navController = navController, orders = orders)
         }
 
         composable(route = Screen.Basket.route){
@@ -43,7 +43,7 @@ fun Navigation(startDestination: String)
                 }
             )){
             entry ->
-            EditDrinkPage(navController = navController, drinkID = entry.arguments?.getInt("drinkID"))
+            EditDrinkPage(navController = navController, drinkID = entry.arguments?.getInt("drinkID"), orders = orders)
         }
 
 //        composable(route = Screen.OrderHistory.route) {
@@ -54,7 +54,7 @@ fun Navigation(startDestination: String)
         }
 
         composable(route = Screen.NewDrink.route){
-            NewDrinkPage(navController)
+            NewDrinkPage(navController , orders = orders)
         }
 
     }

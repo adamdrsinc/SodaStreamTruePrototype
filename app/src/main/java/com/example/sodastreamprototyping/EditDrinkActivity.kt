@@ -16,7 +16,7 @@ import kotlin.collections.addAll
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditDrinkPage(navController: NavController, drinkID: Int?) {
+fun EditDrinkPage(navController: NavController, drinkID: Int?, orders: List<Order>) {
     val context = LocalContext.current
     val config = LocalConfiguration.current
     val screenWidth = config.screenWidthDp
@@ -25,6 +25,7 @@ fun EditDrinkPage(navController: NavController, drinkID: Int?) {
     val drink = Basket.getDrinks().find { it.drinkID == drinkID }
     val drinkFlavors = context.resources.getStringArray(R.array.drink_flavors)
     val drinkBases = context.resources.getStringArray(R.array.drink_bases)
+    val hasOpenOrders = remember { mutableStateOf(orders.any { it.status == "open" }) }
 
     val ingredientsState = remember {
         mutableStateListOf<Pair<String, Int>>().apply {
@@ -41,7 +42,7 @@ fun EditDrinkPage(navController: NavController, drinkID: Int?) {
         // Trigger recomposition when ingredientsState changes
     }
 
-    MainLayout(navController = navController) { innerPadding ->
+    MainLayout(navController = navController, hasOpenOrders = hasOpenOrders.value) { innerPadding ->
         Column(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally,

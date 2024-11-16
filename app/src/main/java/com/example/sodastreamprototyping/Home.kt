@@ -14,8 +14,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
 @Composable
-fun Home(navController: NavController) {
-    MainLayout(navController = navController) { innerPadding ->
+fun Home(navController: NavController, orders: List<Order>) {
+    val hasOpenOrders = remember { mutableStateOf(orders.any { it.status == "open" }) }
+
+    MainLayout(navController = navController, hasOpenOrders = hasOpenOrders.value) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()

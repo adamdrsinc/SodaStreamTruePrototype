@@ -23,7 +23,7 @@ import kotlin.toString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NewDrinkPage(navController: NavController) {
+fun NewDrinkPage(navController: NavController, orders: List<Order>) {
     val context = LocalContext.current
 
     val drink = remember { Drink(name = "Custom", isCustom = true, ingredients = mutableStateListOf<Pair<String, Int>>()) }
@@ -32,7 +32,8 @@ fun NewDrinkPage(navController: NavController) {
     val ingredientsState = remember { drink.ingredients }
     var drinkName by remember { mutableStateOf(drink.name) }
 
-    MainLayout(navController = navController) { innerPadding ->
+    val hasOpenOrders = remember { mutableStateOf(orders.any { it.status == "open" }) }
+    MainLayout(navController = navController, hasOpenOrders = hasOpenOrders.value) { innerPadding ->
         Column(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally,

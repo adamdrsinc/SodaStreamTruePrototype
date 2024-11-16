@@ -51,7 +51,7 @@ fun ShoppingBasket(navController: NavController, modifier: Modifier = Modifier) 
     val paymentSheetLauncher = rememberLauncherForActivityResult(
         contract = PaymentSheetContract(),
         onResult = { paymentSheetResult ->
-            onPaymentSheetResult(paymentSheetResult, context)
+            onPaymentSheetResult(navController, paymentSheetResult, context)
         }
     )
 
@@ -138,12 +138,14 @@ private fun presentPaymentSheet(
 }
 
 private fun onPaymentSheetResult(
+    navController: NavController,
     paymentSheetResult: PaymentSheetResult,
     context: Context
 ) {
     when (paymentSheetResult) {
         is PaymentSheetResult.Completed -> {
             Toast.makeText(context, "Payment Successful", Toast.LENGTH_LONG).show()
+            navController.navigate(Screen.OrderHistory.route)
             Log.i("PaymentSuccess", "Payment completed successfully.")
         }
         is PaymentSheetResult.Canceled -> {

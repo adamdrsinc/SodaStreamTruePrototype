@@ -4,11 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.*
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Menu
@@ -29,6 +25,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainLayout(
     navController: NavController,
+    hasOpenOrders: Boolean,// Make openOrderCount observable for dynamic updates
     content: @Composable (PaddingValues) -> Unit
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -83,9 +80,8 @@ fun MainLayout(
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
                 ) {
-                    Text("Logout", color = Color.White)
+                    Text("Logout")
                 }
             }
         }
@@ -93,20 +89,21 @@ fun MainLayout(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.logo),
-                            contentDescription = "App Logo",
-                            modifier = Modifier.size(80.dp),
-                        )
-                        Text(
-                            text = "Soda Sensation",
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                    }
+                    title = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Start
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.logo),
+                                contentDescription = "App Logo",
+                                modifier = Modifier.size(80.dp),
+                            )
+                            Text(
+                                text = "Soda Sensation",
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                        }
                     },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
@@ -114,14 +111,26 @@ fun MainLayout(
                         }
                     },
                     actions = {
-                        IconButton(onClick = {
-                            navController.navigate(Screen.OrderHistory.route)
-                        }) {
-                            Icon(Icons.Default.History, contentDescription = "Order History")
+                        // Order History Button with Badge
+                        if (hasOpenOrders) {
+                            BadgedBox(
+                                badge = { Badge(containerColor = Color.Red) {} } // Empty badge with only red background
+                            ) {
+                                IconButton(onClick = {
+                                    navController.navigate(Screen.OrderHistory.route)
+                                }) {
+                                    Icon(Icons.Default.History, contentDescription = "Order History")
+                                }
+                            }
+                        } else {
+                            IconButton(onClick = {
+                                navController.navigate(Screen.OrderHistory.route)
+                            }) {
+                                Icon(Icons.Default.History, contentDescription = "Order History")
+                            }
                         }
                         IconButton(onClick = {
                             navController.navigate(Screen.Basket.route)
-
                         }) {
                             Icon(Icons.Default.ShoppingCart, contentDescription = "Cart")
                         }

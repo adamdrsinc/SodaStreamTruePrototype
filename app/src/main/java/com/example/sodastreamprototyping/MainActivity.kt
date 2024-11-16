@@ -16,7 +16,7 @@ class MainActivity : ComponentActivity() {
             MaterialTheme {
                 val isLoggedIn = UserPreferences.isLoggedIn(this@MainActivity)
                 val startDestination = if (isLoggedIn) Screen.Home.route else Screen.SignIn.route
-                Navigation(startDestination)
+                Navigation(startDestination, orders = listOf())
             }
         }
     }
