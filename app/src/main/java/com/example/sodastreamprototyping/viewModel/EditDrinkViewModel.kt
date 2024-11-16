@@ -43,18 +43,21 @@ class EditDrinkViewModel @AssistedInject constructor(
     }
 
     fun setBase(baseIndex: Int) {
-        regenerateSuggestions()
         _drink.value = _drink.value.copy(baseDrink = baseIndex)
+        regenerateSuggestions()
     }
 
     fun addIngredient(ingredientIndex: Int): Boolean {
+        val success = _drink.value.addIngredient(ingredientIndex)
         regenerateSuggestions()
-        return _drink.value.addIngredient(ingredientIndex)
+        return success
+
     }
 
     fun removeIngredient(ingredientIndex: Int): Boolean {
+        val success =  _drink.value.decrementIngredient(ingredientIndex)
         regenerateSuggestions()
-        return _drink.value.decrementIngredient(ingredientIndex)
+        return success
     }
 
     fun saveDrink() {
@@ -62,10 +65,11 @@ class EditDrinkViewModel @AssistedInject constructor(
     }
 
     private fun regenerateSuggestions() {
-        _suggestions.value = emptyList<Int>()
+        _suggestions.value = emptyList<Int>() //generation may take a few seconds, don't mislead the user by showing
+        // old suggestions
         viewModelScope.launch{
             _suggestions.value =
-                ai.generateDrink(drink.value.baseDrink, drink.value.getAllIngredientQuantity(ai.flavorSize))
+                ai.generateDrink(_drink.value.baseDrink, _drink.value.getAllIngredientQuantity(ai.flavorSize))
         }
     }
 }

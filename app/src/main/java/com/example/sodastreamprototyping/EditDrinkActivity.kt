@@ -34,7 +34,6 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
 
     val context = LocalContext.current
     val scrollState = rememberScrollState()
-//    val editDrinkViewModel: EditDrinkViewModel = viewModel(factory = EditDrinkViewModel.Factory(drink.copy()))
     val editDrinkViewModel = hiltViewModel<EditDrinkViewModel, EditDrinkViewModel.Factory>(
         creationCallback = { factory -> factory.create(drink = drink.copy()) }
     )
@@ -194,7 +193,7 @@ fun IngredientRow(ingredient: Pair<Int, String>, aiRecommended: Boolean = false,
     val context = LocalContext.current
 
     val modifier = Modifier
-        .background(if (aiRecommended) Color.Yellow else Color.Transparent)
+        .background(if (aiRecommended) Color.Yellow.copy(alpha = 0.5f) else Color.Transparent)
         .fillMaxWidth()
         .clickable {
             if (!select(ingredient.first)) {
