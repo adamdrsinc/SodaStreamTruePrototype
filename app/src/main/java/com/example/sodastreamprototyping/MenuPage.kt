@@ -24,8 +24,8 @@ fun MenuPage() {
     val drinkIngredients = context.resources.getStringArray(R.array.drink_flavors)
 
     var ingList1 : MutableList<Pair<Int, Int>> = mutableListOf(
-        Pair(0, 1),
-        Pair(1, 1)
+        Pair(2, 1),
+        Pair(3, 1)
     )
     var ingList2 : MutableList<Pair<Int, Int>> = mutableListOf(
         Pair(2, 1),
