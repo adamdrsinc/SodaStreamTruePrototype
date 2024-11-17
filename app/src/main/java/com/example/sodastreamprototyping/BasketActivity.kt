@@ -1,6 +1,5 @@
 package com.example.sodastreamprototyping
 
-
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
@@ -13,15 +12,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Icon
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
@@ -35,6 +32,7 @@ import com.stripe.android.paymentsheet.PaymentSheetContract
 @Composable
 fun ShoppingBasket(navController: NavController, modifier: Modifier = Modifier) {
     val context = LocalContext.current
+    val config = LocalConfiguration.current
 
     // Initialize Stripe Payment Configuration
     LaunchedEffect(Unit) {
@@ -251,10 +249,8 @@ fun DrinkRow(label: String, value: String, screenWidth: Int) {
 @Composable
 fun ActionButtons(isCustom: Boolean, onEdit: () -> Unit, onDelete: () -> Unit) {
     Row {
-        if(isCustom){
-            Button(onClick = onEdit, modifier = Modifier.padding(4.dp)) {
-                Text(text = "Edit")
-            }
+        Button(onClick = onEdit, modifier = Modifier.padding(4.dp)) {
+            Text(text = "Edit")
         }
 
         Button(onClick = onDelete, modifier = Modifier.padding(4.dp)) {

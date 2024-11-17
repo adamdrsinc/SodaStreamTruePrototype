@@ -9,6 +9,7 @@ sealed class Screen(val route: String) {
     object NewDrink: Screen("new_drink")
     object OrderHistory: Screen("order_history")
 
+
     fun withArgs(vararg args: String): String{
         return buildString{
             append(route)

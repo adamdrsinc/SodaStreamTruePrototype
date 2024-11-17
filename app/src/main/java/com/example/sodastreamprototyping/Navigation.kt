@@ -53,9 +53,9 @@ fun Navigation(startDestination: String, orders: List<Order>)
             OrderHistoryScreenDemo(navController)
         }
 
-        composable(route = Screen.NewDrink.route){
-            NewDrinkPage(navController , orders = orders)
-        }
+//        composable(route = Screen.NewDrink.route){
+//            NewDrinkPage(navController , orders = orders)
+//        }
 
     }
 }

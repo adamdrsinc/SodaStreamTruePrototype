@@ -75,5 +75,7 @@ dependencies {
     // Google Pay
     implementation ("com.google.android.gms:play-services-wallet:18.1.3")
 
+    // TensorFlow
+    implementation ("org.tensorflow:tensorflow-lite:2.10.0")
 
 }
