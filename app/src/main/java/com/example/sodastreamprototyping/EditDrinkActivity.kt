@@ -26,7 +26,7 @@ import androidx.compose.foundation.verticalScroll
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditDrinkPage(navController: NavController, drinkID: Int?) {
+fun EditDrinkPage(navController: NavController, drinkID: Int?, orders: List<Order>) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
@@ -49,13 +49,14 @@ fun EditDrinkPage(navController: NavController, drinkID: Int?) {
     val ingredientsState = remember { drinkCopy.ingredients }
     var drinkQuantity = remember { drinkCopy.quantity }
     var drinkName by remember { mutableStateOf(drinkCopy.name) }
+    val hasOpenOrders = remember { mutableStateOf(orders.any { it.status == "open" }) }
 
     // LaunchedEffect to observe changes in ingredientsState
     LaunchedEffect(ingredientsState) {
         // Trigger recomposition when ingredientsState changes
     }
 
-    MainLayout(navController = navController) { innerPadding ->
+    MainLayout(navController = navController, hasOpenOrders = hasOpenOrders.value) { innerPadding ->
         Column(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally,
