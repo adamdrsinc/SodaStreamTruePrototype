@@ -3,6 +3,7 @@ package com.example.sodastreamprototyping
 class Basket {
     companion object{
         val basketDrinks : ArrayList<Drink> = arrayListOf()
+        private var lastDrinkID: Int = 0
 
         fun saveDrink(drink: Drink){
             val oldDrink = getDrinks().indexOfFirst { it.drinkID == drink.drinkID }
@@ -33,12 +34,7 @@ class Basket {
         }
 
         fun getNextDrinkID(): Int{
-            var id = 0
-            basketDrinks.forEach {
-                id++
-            }
-
-            return id + 1
+            return ++lastDrinkID
         }
     }
 }
