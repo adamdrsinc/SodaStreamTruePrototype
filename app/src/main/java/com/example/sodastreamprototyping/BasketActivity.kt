@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -207,25 +208,44 @@ fun BasketItemCard(
             .padding(16.dp)
             .width((screenWidth * 0.90).dp)
             .border(2.dp, Color.Black)
-            .padding(24.dp)
     ) {
+        Spacer(Modifier.height(12.dp))
         Text(
             text = drink.name,
             fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+            fontWeight = FontWeight.Bold
         )
 
-        Text(text = "Base: ${baseArray[drink.baseDrink]}", fontSize = 16.sp)
+        Spacer(Modifier.height(4.dp))
+        Text(text = "$%.2f".format(drink.getPrice()), fontSize = 18.sp, fontWeight = FontWeight.Medium)
 
-        DrinkRow("Quantity", drink.quantity.toString(), screenWidth)
-        DrinkRow("Ice", drink.iceQuantity.toString(), screenWidth)
+        Spacer(Modifier.height(8.dp))
+        Text(text = "Base: ${baseArray[drink.baseDrink]}", fontSize = 16.sp)
+        Spacer(Modifier.height(4.dp))
 
         drink.ingredients.forEach { ingredient ->
-            DrinkRow(flavorArray[ingredient.first], ingredient.second.toString(), screenWidth)
+            Row(
+                modifier = Modifier.width((screenWidth * 0.40).dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(text = flavorArray[ingredient.first], fontSize = 16.sp)
+                Text(text = "x${ingredient.second}", fontSize = 16.sp)
+            }
         }
 
+        Spacer(Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.width((screenWidth * 0.40).dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text("Ice: ${drink.iceQuantity}", fontSize = 16.sp)
+            Text("Quantity: ${drink.quantity}", fontSize = 16.sp)
+        }
+        Spacer(Modifier.height(8.dp))
+
         ActionButtons(isCustom = drink.isCustom, onEdit = onEdit, onDelete = onDelete)
+
+        Spacer(Modifier.height(12.dp))
     }
 }
 

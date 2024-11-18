@@ -67,6 +67,12 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
             SectionTitle(text = titleText, centered = true)
             Spacer(modifier = Modifier.height(18.dp))
 
+            // Display current selections
+            SectionTitle("Current Drink Summary")
+            CurrentDrinkSummary(newDrink,
+                { editDrinkViewModel.addIngredient(it) }, { editDrinkViewModel.removeIngredient(it) })
+            Spacer(modifier = Modifier.height(18.dp))
+
             //Drink Bases Dropdown
             SectionTitle("Bases")
             DropdownMenuDrinkBases(newDrink) { editDrinkViewModel.setBase(it) }
@@ -98,12 +104,6 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
             )
             Spacer(modifier = Modifier.height(18.dp))
 
-            // Display current selections
-            SectionTitle("Current Drink Summary")
-            CurrentDrinkSummary(newDrink,
-                { editDrinkViewModel.addIngredient(it) }, { editDrinkViewModel.removeIngredient(it) })
-            Spacer(modifier = Modifier.height(18.dp))
-
             // Save button
             Button(
                 onClick = {
@@ -121,7 +121,7 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
 
 @Composable
 fun SectionTitle(
-    text: String, color: Color = Color.LightGray,
+    text: String, color: Color = Color.hsl(hue = 270f, saturation = 0.5f, lightness = 0.8f),
     centered: Boolean = false
 ) {
     Text(
@@ -340,35 +340,30 @@ fun IceQuantitySlider(drink: Drink, setIce: (Int) -> Unit) {
 fun DropdownMenuDrinkBases(newDrink: Drink, selectBase: (Int) -> Unit) {
     val context = LocalContext.current
 
-    var isExpanded = remember {
-        mutableStateOf(false)
-    }
-    var selectedText = remember {
-        mutableStateOf("")
-    }
+    var isExpanded by remember { mutableStateOf(false) }
     val drinkBases = context.resources.getStringArray(R.array.drink_bases)
 
     ExposedDropdownMenuBox(
-        expanded = isExpanded.value,
-        onExpandedChange = { isExpanded.value = !isExpanded.value },
-        modifier = Modifier
-            .fillMaxWidth()
+        expanded = isExpanded,
+        onExpandedChange = { isExpanded = !isExpanded },
+        modifier = Modifier.fillMaxWidth()
     ) {
         TextField(
             value = drinkBases[newDrink.baseDrink],
             onValueChange = {},
             readOnly = true,
             trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded.value)
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
             },
             colors = ExposedDropdownMenuDefaults.textFieldColors(),
             modifier = Modifier
-                .menuAnchor()
+                .menuAnchor() // Ensure the TextField acts as an anchor for the dropdown
+                .fillMaxWidth()
         )
 
         ExposedDropdownMenu(
-            expanded = isExpanded.value,
-            onDismissRequest = { isExpanded.value = false }
+            expanded = isExpanded,
+            onDismissRequest = { isExpanded = false }
         ) {
             drinkBases.forEachIndexed { index, baseName ->
                 DropdownMenuItem(
@@ -376,9 +371,8 @@ fun DropdownMenuDrinkBases(newDrink: Drink, selectBase: (Int) -> Unit) {
                         Text(text = baseName)
                     },
                     onClick = {
-                        selectedText.value = baseName
                         selectBase(index)
-                        isExpanded.value = false
+                        isExpanded = false
                     }
                 )
             }
