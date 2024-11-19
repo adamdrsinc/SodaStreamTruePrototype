@@ -13,28 +13,14 @@ class Basket {
             }
             basketDrinks[oldDrink] = drink
         }
-        fun addDrink(drink: Drink){
-            drink.drinkID = getNextDrinkID()
-            basketDrinks.add(drink)
-//            var drinkExists = basketDrinks.find{
-//                it.name == drink.name
-//            }
-//
-//            if(drinkExists == null){
-//                drink.drinkID = getNextDrinkID()
-//                basketDrinks.add(drink)
-//            }else{
-//                drinkExists.quantity++
-//            }
-        }
 
+        fun addDrink(drink: Drink){
+            drink.drinkID = ++lastDrinkID
+            basketDrinks.add(drink)
+        }
 
         fun getDrinks(): ArrayList<Drink>{
             return basketDrinks
-        }
-
-        fun getNextDrinkID(): Int{
-            return ++lastDrinkID
         }
     }
 }
