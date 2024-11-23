@@ -1,8 +1,6 @@
 package com.example.sodastreamprototyping
 
-import android.content.Context
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -15,9 +13,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.practice.ApiRequestHelper
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 @Composable
 fun SignInScreen(
@@ -44,10 +39,6 @@ fun SignInScreen(
                 .size(200.dp)
                 .padding(bottom = 32.dp)
         )
-
-        var username by remember { mutableStateOf("") }
-        var password by remember { mutableStateOf("") }
-        var errorMessage by remember { mutableStateOf<String?>(null) }
 
         OutlinedTextField(
             value = username,
@@ -82,28 +73,28 @@ fun SignInScreen(
                     errorMessage = "Please fill out all fields"
                 } else {
                     errorMessage = null
-                    CoroutineScope(Dispatchers.IO).launch {
-                        ApiRequestHelper.makeLoginRequest(
-                            context = context,
-                            username = username,
-                            password = password,
-                            onSuccess = { response ->
-                                CoroutineScope(Dispatchers.Main).launch {
-                                    Log.d("LOGIN_SUCCESS", response.toString())
-                                    // Send the refresh and access token to the user preferences so that it can be stored and re-used on each app open
-                                    UserPreferences.setLoggedIn(context, true, response.getString("access_token"), response.getString("refresh_token"))
-                                    onSignInSuccess()
-                                }
-                            },
-                            onError = { error ->
-                                CoroutineScope(Dispatchers.Main).launch {
-                                    errorMessage = error
-                                }
+                    ApiRequestHelper.makeLoginRequest(
+                        context = context,
+                        username = username,
+                        password = password,
+                        onSuccess = { response ->
+                            try {
+                                val accessToken = response.getString("access_token")
+                                Log.d("ACCESS_TOKEN", "Access Token: $accessToken")
+                                val refreshToken = response.getString("refresh_token")
+                                Log.d("REFRESH_TOKEN", "Refresh Token: $refreshToken")
+                                UserPreferences.login(context, accessToken, refreshToken)
+                                onSignInSuccess()
+                            } catch (e: Exception) {
+                                Log.e("LOGIN_ERROR", e.toString())
+                                errorMessage = "Failed to parse tokens"
                             }
-                        )
-                    }
+                        },
+                        onError = { error ->
+                            errorMessage = error
+                        }
+                    )
                 }
-
             },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -117,5 +108,3 @@ fun SignInScreen(
         }
     }
 }
-
-

@@ -3,15 +3,12 @@ package com.example.practice
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.ui.platform.LocalContext
-import com.android.volley.Request
-import com.android.volley.RequestQueue
-import com.android.volley.Response
+import com.android.volley.*
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.example.sodastreamprototyping.Repository
+import com.example.sodastreamprototyping.UserPreferences
 import org.json.JSONObject
-
 
 class ApiRequestHelper {
 
@@ -19,9 +16,9 @@ class ApiRequestHelper {
         private const val BASE_URL = "http://10.0.2.2:8080"
 
         /*
-        * Obtains all data for singletons etc. used in the app.
-        * */
-        fun retrieveAllNeededData(context: Context){
+         * Obtains all data for singletons etc. used in the app.
+         */
+        fun retrieveAllNeededData(context: Context) {
             fetchIngredients(
                 context = context,
                 onSuccess = { ingredients ->
@@ -33,36 +30,32 @@ class ApiRequestHelper {
             )
         }
 
-
         // Function to handle login request
         fun makeLoginRequest(
             context: Context,
             username: String,
             password: String,
             onSuccess: (JSONObject) -> Unit,
-            onError: (String) -> Unit)
-        {
+            onError: (String) -> Unit
+        ) {
             val url = "$BASE_URL/auth/authenticate"
 
-            // Create JSON object for request parameters
             val jsonParams = JSONObject().apply {
                 put("username", username)
                 put("password", password)
             }
 
-            // Create a request using Volley
             val jsonObjectRequest = JsonObjectRequest(
                 Request.Method.POST, url, jsonParams,
-                Response.Listener { response ->
+                { response ->
                     onSuccess(response)
                 },
-                Response.ErrorListener { error ->
+                { error ->
                     Log.e("API_ERROR", error.toString())
-                    onError(error.message ?: "An error occurred")
+                    onError(error.message ?: "An error occurred during login")
                 }
             )
 
-            // Add the request to the RequestQueue
             val requestQueue: RequestQueue = Volley.newRequestQueue(context)
             requestQueue.add(jsonObjectRequest)
         }
@@ -75,12 +68,11 @@ class ApiRequestHelper {
             username: String,
             email: String,
             password: String,
-            onSuccess: () -> Unit,
+            onSuccess: (JSONObject) -> Unit,
             onError: (String) -> Unit
         ) {
             val url = "$BASE_URL/auth/register"
 
-            // Create JSON object for request parameters
             val jsonParams = JSONObject().apply {
                 put("firstname", firstname)
                 put("lastname", lastname)
@@ -89,19 +81,18 @@ class ApiRequestHelper {
                 put("password", password)
             }
 
-            // Create a request using Volley
             val jsonObjectRequest = object : JsonObjectRequest(
                 Request.Method.POST, url, jsonParams,
-                Response.Listener { response ->
-                    onSuccess()
+                { response ->
+                    onSuccess(response)
                 },
-                Response.ErrorListener { error ->
+                { error ->
                     if (error.networkResponse != null) {
                         val responseData = String(error.networkResponse.data, Charsets.UTF_8)
                         Log.e("API_ERROR", "Response Code: ${error.networkResponse.statusCode}, Error data: $responseData")
                     }
                     Log.e("API_ERROR", "Volley Error: $error")
-                    onError(error.message ?: "An error occurred")
+                    onError(error.message ?: "An error occurred during sign-up")
                 }
             ) {
                 override fun getHeaders(): Map<String, String> {
@@ -111,14 +102,107 @@ class ApiRequestHelper {
                 }
             }
 
-
-
-            // Add the request to the RequestQueue
             val requestQueue: RequestQueue = Volley.newRequestQueue(context)
             requestQueue.add(jsonObjectRequest)
         }
 
-        // PAYMENT HANDLING
+        // Function to refresh access token
+        fun refreshAccessToken(
+            context: Context,
+            refreshToken: String,
+            onSuccess: () -> Unit,
+            onError: (String) -> Unit
+        ) {
+            val url = "$BASE_URL/auth/refresh"
+
+            val jsonParams = JSONObject().apply {
+                put("refreshToken", refreshToken)
+            }
+
+            val jsonObjectRequest = JsonObjectRequest(
+                Request.Method.POST, url, jsonParams,
+                { response ->
+                    try {
+                        val newAccessToken = response.getString("access_token")
+                        UserPreferences.setAccessToken(context, newAccessToken)
+                        Log.d("REFRESHED_ACCESS_TOKEN", "New Access Token: $newAccessToken")
+                        onSuccess()
+                    } catch (e: Exception) {
+                        Log.e("API_ERROR", e.toString())
+                        onError("Failed to parse new access token")
+                    }
+                },
+                { error ->
+                    Log.e("API_ERROR", error.toString())
+                    onError(error.message ?: "An error occurred while refreshing token")
+                }
+            )
+
+            val requestQueue: RequestQueue = Volley.newRequestQueue(context)
+            requestQueue.add(jsonObjectRequest)
+        }
+
+        // Function to fetch ingredients data
+        fun fetchIngredients(
+            context: Context,
+            onSuccess: (List<String>) -> Unit,
+            onError: (String) -> Unit
+        ) {
+            val url = "$BASE_URL/inventory/all"
+            val accessToken = UserPreferences.getAccessToken(context)
+
+            val jsonObjectRequest = object : JsonObjectRequest(
+                Request.Method.GET, url, null,
+                { response ->
+                    try {
+                        val syrups = mutableListOf<String>()
+                        val ingredientsArray = response.getJSONArray("ingredients")
+                        for (i in 0 until ingredientsArray.length()) {
+                            val syrup = ingredientsArray.getString(i)
+                            syrups.add(syrup)
+                        }
+                        onSuccess(syrups)
+                    } catch (e: Exception) {
+                        Log.e("API_ERROR", e.toString())
+                        onError("Failed to parse ingredients")
+                    }
+                },
+                { error ->
+                    Log.e("API_ERROR", error.toString())
+                    if (error.networkResponse?.statusCode == 401) {
+                        // Access token might be expired, try refreshing
+                        val refreshToken = UserPreferences.getRefreshToken(context)
+                        if (refreshToken != null) {
+                            refreshAccessToken(
+                                context,
+                                refreshToken,
+                                onSuccess = {
+                                    // Retry the request after refreshing token
+                                    fetchIngredients(context, onSuccess, onError)
+                                },
+                                onError = { refreshError ->
+                                    onError(refreshError)
+                                }
+                            )
+                        } else {
+                            onError("Authentication failed. Please log in again.")
+                        }
+                    } else {
+                        onError(error.message ?: "An error occurred while fetching ingredients")
+                    }
+                }
+            ) {
+                override fun getHeaders(): MutableMap<String, String> {
+                    val headers = HashMap<String, String>()
+                    headers["Authorization"] = "Bearer $accessToken"
+                    return headers
+                }
+            }
+
+            val requestQueue: RequestQueue = Volley.newRequestQueue(context)
+            requestQueue.add(jsonObjectRequest)
+        }
+
         // Function to fetch payment intent
         fun fetchPaymentIntent(
             context: Context,
@@ -146,7 +230,7 @@ class ApiRequestHelper {
                 },
                 { error ->
                     Log.e("API_ERROR", error.toString())
-                    onError(error.message ?: "An error occurred")
+                    onError(error.message ?: "An error occurred while fetching payment intent")
                 }
             )
 
@@ -154,46 +238,6 @@ class ApiRequestHelper {
             requestQueue.add(jsonObjectRequest)
         }
 
-
-        // DRINK REQUEST HANDLING
-        // Function to fetch ingredients data
-        fun fetchIngredients(
-            context: Context,
-            onSuccess: (List<String>) -> Unit,
-            onError: (String) -> Unit
-        ) {
-            val url = "${BASE_URL}/inventory/all"
-
-            val jsonObjectRequest = JsonObjectRequest(
-                Request.Method.GET, url, null,
-                Response.Listener { response ->
-                    try {
-                        val syrups = mutableListOf<String>()
-                        val ingredientsArray = response.getJSONArray("ingredients")
-                        for (i in 0 until ingredientsArray.length()) {
-                            val syrup = ingredientsArray.getString(i)
-                            syrups.add(syrup)
-                        }
-                        onSuccess(syrups)
-                    } catch (e: Exception) {
-                        Log.e("API_ERROR", e.toString())
-                        onError("Failed to parse ingredients")
-                    }
-                },
-                Response.ErrorListener { error ->
-                    Log.e("API_ERROR", error.toString())
-                    onError(error.message ?: "An error occurred")
-                }
-            ) {
-                override fun getHeaders(): MutableMap<String, String> {
-                    val headers = HashMap<String, String>()
-                    headers["Auth-Bearer"] = ""// token goes here
-                    return headers
-                }
-            }
-
-            val requestQueue: RequestQueue = Volley.newRequestQueue(context)
-            requestQueue.add(jsonObjectRequest)
-        }
+        // You can add other API methods below as needed, following the same pattern.
     }
 }
