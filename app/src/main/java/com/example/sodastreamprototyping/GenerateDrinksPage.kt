@@ -41,7 +41,6 @@ import kotlinx.coroutines.launch
 fun GenerateDrinksPage(onDrinkSelected: (Drink) -> Unit) {
     val viewModel : GenerateDrinksViewModel = hiltViewModel()
     val drinks by viewModel.drinks.collectAsState()
-
     val baseArray = LocalContext.current.resources.getStringArray(R.array.drink_bases)
     val flavorArray = LocalContext.current.resources.getStringArray(R.array.drink_flavors)
     var isRefreshing by remember { mutableStateOf(false) }

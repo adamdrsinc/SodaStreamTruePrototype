@@ -24,8 +24,8 @@ fun MenuPage() {
     val drinkIngredients = context.resources.getStringArray(R.array.drink_flavors)
 
     var ingList1 : MutableList<Pair<Int, Int>> = mutableListOf(
-        Pair(0, 1),
-        Pair(1, 1)
+        Pair(2, 1),
+        Pair(3, 1)
     )
     var ingList2 : MutableList<Pair<Int, Int>> = mutableListOf(
         Pair(2, 1),
@@ -81,9 +81,20 @@ fun DrinkCard(drink: Drink) {
             ) {
                 Text(text = drink.name, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(4.dp))
-//                Text(text = drink.getPrice().toString(), fontSize = 16.sp, fontWeight = FontWeight.Medium)
+
                 Text(text = "$%.2f".format(drink.getPrice()), fontSize = 16.sp, fontWeight = FontWeight.Medium)
-                Spacer(modifier = Modifier.height(4.dp))
+
+                val drinkIngredients = drink.ingredients
+                var drinkString = ""
+                for(i in 0 until drinkIngredients.size){
+                    val ingredientToString = context.resources.getStringArray(R.array.drink_flavors)[drinkIngredients[i].first]
+                    val addedString = if(i != drinkIngredients.size - 1) ", " else ""
+                    drinkString += ingredientToString + " x${drinkIngredients[i].second}" + addedString
+                }
+
+                Text(text = drinkString, fontSize = 14.sp)
+                Text(text = "Ice: ${drink.iceQuantity}", fontSize = 14.sp)
+
 
                 if(drink.description != null){
                     Text(text = drink.description!!, fontSize = 14.sp)

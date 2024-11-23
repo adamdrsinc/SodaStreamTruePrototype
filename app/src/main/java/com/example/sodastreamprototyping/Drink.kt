@@ -36,7 +36,6 @@ data class Drink(
         for (drinkIngredient in ingredients) {
             currentPumpCount += drinkIngredient.second
         }
-
     }
 
     fun hasIngredient(ingredient: Int): Pair<Int, Int>? {
@@ -99,6 +98,18 @@ data class Drink(
             return true
         }
         return false
+    }
+
+    /**
+     * returns a list of all possible ingredients of [size] size, where the index corresponds to the ingredient
+     * and the value corresponds to the quantity. Includes ingredients with quantity 0.
+     */
+    fun getAllIngredientQuantity(size: Int) : IntArray{
+        val quantities = IntArray(size){0}
+        for(item in ingredients){
+            quantities[item.first] = item.second
+        }
+        return quantities
     }
 
 }
