@@ -12,9 +12,11 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.practice.ApiRequestHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+
 
 @Composable
 fun SignInScreen(
@@ -41,10 +43,6 @@ fun SignInScreen(
                 .size(200.dp)
                 .padding(bottom = 32.dp)
         )
-
-        var username by remember { mutableStateOf("") }
-        var password by remember { mutableStateOf("") }
-        var errorMessage by remember { mutableStateOf<String?>(null) }
 
         OutlinedTextField(
             value = username,
@@ -79,27 +77,28 @@ fun SignInScreen(
                     errorMessage = "Please fill out all fields"
                 } else {
                     errorMessage = null
-                    CoroutineScope(Dispatchers.IO).launch {
-                        ApiRequestHelper.makeLoginRequest(
-                            context = context,
-                            username = username,
-                            password = password,
-                            onSuccess = { response ->
-                                CoroutineScope(Dispatchers.Main).launch {
-                                    Log.d("LOGIN_SUCCESS", response.toString())
-                                    UserPreferences.setLoggedIn(context, true)
-                                    onSignInSuccess()
-                                }
-                            },
-                            onError = { error ->
-                                CoroutineScope(Dispatchers.Main).launch {
-                                    errorMessage = error
-                                }
+                    ApiRequestHelper.makeLoginRequest(
+                        context = context,
+                        username = username,
+                        password = password,
+                        onSuccess = { response ->
+                            try {
+                                val accessToken = response.getString("access_token")
+                                Log.d("ACCESS_TOKEN", "Access Token: $accessToken")
+                                val refreshToken = response.getString("refresh_token")
+                                Log.d("REFRESH_TOKEN", "Refresh Token: $refreshToken")
+                                UserPreferences.login(context, accessToken, refreshToken)
+                                onSignInSuccess()
+                            } catch (e: Exception) {
+                                Log.e("LOGIN_ERROR", e.toString())
+                                errorMessage = "Failed to parse tokens"
                             }
-                        )
-                    }
+                        },
+                        onError = { error ->
+                            errorMessage = error
+                        }
+                    )
                 }
-
             },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -113,5 +112,3 @@ fun SignInScreen(
         }
     }
 }
-
-
