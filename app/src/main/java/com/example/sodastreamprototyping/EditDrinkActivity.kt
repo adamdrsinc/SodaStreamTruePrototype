@@ -51,7 +51,11 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
     }
 
     //TODO: Get drink flavors from DB, not from resources
-    val drinkFlavors = context.resources.getStringArray(R.array.drink_flavors)
+    val drinkFlavors =
+        if(Repository.drinkFlavorsFromDB.isEmpty())
+            context.resources.getStringArray(R.array.drink_flavors)
+        else
+            Repository.drinkFlavorsFromDB.toTypedArray()
 
     MainLayout(navController = navController) { innerPadding ->
         Column(

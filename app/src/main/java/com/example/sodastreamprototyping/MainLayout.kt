@@ -71,7 +71,10 @@ fun MainLayout(
                     icon = { Icon(Icons.Default.Settings, contentDescription = null) },
                     label = { Text("Settings") },
                     selected = false,
-                    onClick = { scope.launch { drawerState.close() } }
+                    onClick = {
+                        navController.navigate(Screen.OrderHistory.route)
+                        scope.launch { drawerState.close() }
+                    }
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Button(
