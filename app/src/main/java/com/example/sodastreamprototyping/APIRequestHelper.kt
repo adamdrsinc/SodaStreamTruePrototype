@@ -1,10 +1,9 @@
-package com.example.sodastreamprototyping
+package com.example.practice
 
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
-import com.android.volley.Request
-import com.android.volley.RequestQueue
+import com.android.volley.*
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.example.sodastreamprototyping.Repository
@@ -82,7 +81,7 @@ class ApiRequestHelper {
                 put("password", password)
             }
 
-            val jsonObjectRequest = JsonObjectRequest(
+            val jsonObjectRequest = object : JsonObjectRequest(
                 Request.Method.POST, url, jsonParams,
                 { response ->
                     onSuccess(response)
@@ -238,5 +237,7 @@ class ApiRequestHelper {
             val requestQueue: RequestQueue = Volley.newRequestQueue(context)
             requestQueue.add(jsonObjectRequest)
         }
+
+        // You can add other API methods below as needed, following the same pattern.
     }
 }
