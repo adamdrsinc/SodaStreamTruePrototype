@@ -15,10 +15,12 @@ class TensorFlowAPITest {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         api = TensorFlowAPI(context)
     }
+
+
     @Test
     fun outputIsReasonable(){
-        //because the AI is a black box, we can't tests specifics, but a few things should hold true, otherwise the
-        // model is flawed:
+        //because the AI is a black box, we can't tests specifics, but a few things should hold true,
+        // otherwise the model is flawed:
 
         //if the drink has not ingredients, it should get some output.
         for(i in 0 until 4){ //test with all bases

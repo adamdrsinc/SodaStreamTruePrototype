@@ -24,10 +24,8 @@ class GenerateDrinksViewModel @Inject constructor(private val ai: TensorFlowAPI)
         mutableMapOf()
     } //use memoized approach and store results of AI for better efficiency.
     init{
-        viewModelScope.launch{
-            _drinks.value = List(ai.baseSize){ base ->
-                emptyList()
-            }
+        _drinks.value = List(ai.baseSize){ base ->
+            emptyList()
         }
     }
 
