@@ -10,6 +10,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
+import org.junit.Assert.assertNotEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
@@ -17,13 +18,14 @@ import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.isA
 import org.mockito.kotlin.mock
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class GenerateDrinksTest {
     lateinit var ai : TensorFlowAPI
 
     @Before
     fun initViewModel() {
-        //create a simple mock AI outputs, output drinks should have two flavors
+        //create a simple mock AI outputs, this combination should allow for 6 unique drinks.
         val mockResults = mapOf(
             listOf(0, 0, 0) to listOf(0, 1, 2),
             listOf(1, 0, 0) to listOf(0, 1, 2),
@@ -67,6 +69,40 @@ class GenerateDrinksTest {
         viewModel.expand(testBase)
         advanceUntilIdle()
         assertEquals(1, viewModel.drinks.value[testBase].size)
+        assertEquals(0, viewModel.drinks.value[testBase+1].size)
+    }
+
+    @Test
+    fun `expanding should not create duplicates`() = runTest{
+        Dispatchers.setMain(Dispatchers.Default)
+        val testBase = 0
+        val viewModel = GenerateDrinksViewModel(ai)
+
+        repeat(10){
+            viewModel.expand(0)
+        }
+        advanceUntilIdle()
+
+        assertEquals(6, viewModel.drinks.value[testBase].size) //are all possible drinks made?
+        assertTrue(viewModel.exhaustedDrinks[testBase])
+
+        val drinkList = viewModel.drinks.value[testBase]
+        viewModel.drinks.value[testBase].forEachIndexed { index, drink ->
+            for(i in (index + 1) until drinkList.size){
+                assertNotEquals(drink.ingredients, drinkList[i].ingredients)
+            }
+        }
+    }
+
+    @Test
+    fun reset() = runTest{
+        Dispatchers.setMain(Dispatchers.Default)
+        val testBase = 0
+        val viewModel = GenerateDrinksViewModel(ai)
+        viewModel.expand(testBase)
+        advanceUntilIdle()
+        viewModel.clear()
+        assertEquals(0, viewModel.drinks.value[testBase].size)
     }
 
 
