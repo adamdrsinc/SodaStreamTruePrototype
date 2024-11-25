@@ -7,8 +7,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.practice.ApiRequestHelper
 
 data class Order(
     val id: Int,
@@ -18,8 +21,24 @@ data class Order(
 
 @Composable
 fun OrderHistoryScreen(orders: List<Order>) {
+    val context = LocalContext.current
+
     val openOrders = remember { orders.filter { it.status == "open" } }
     val closedOrders = remember { orders.filter { it.status == "closed" } }
+
+    val orderHistory = mutableListOf<MutableList<String>>()
+
+    ApiRequestHelper.fetchOrderHistory(
+        context,
+        onSuccess = {
+            orders ->
+            for (order in orders) {
+                //orderHistory.add(mutableListOf(order.description, order.status))
+            }
+        },
+        onError = {
+
+        })
 
     Column(modifier = Modifier.fillMaxSize()) {
         OpenOrdersSection(openOrders)
@@ -32,9 +51,7 @@ fun OpenOrdersSection(orders: List<Order>) {
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Open Orders", style = MaterialTheme.typography.titleLarge)
         orders.forEach { order ->
-            OrderCard(order, buttonText = "I'm Here", onClick = {
-                // Placeholder for action, like updating order status
-            })
+            OrderCard(order, buttonText = "I'm Here")
         }
     }
 }
@@ -52,6 +69,43 @@ fun ClosedOrdersSection(orders: List<Order>) {
 }
 
 @Composable
+fun OrderCard(order: Order, buttonText: String? = null) {
+    var isClicked by remember { mutableStateOf(false) }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(all = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(order.description, style = MaterialTheme.typography.bodyLarge)
+            Spacer(modifier = Modifier.weight(1f))
+            if (buttonText != null) {
+                Button(
+                    onClick = {
+                        isClicked = true
+                              },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isClicked) Color.Green else MaterialTheme.colorScheme.primary,
+                        contentColor = if (isClicked) Color.White else MaterialTheme.colorScheme.onPrimary
+                    ),
+                    modifier = Modifier.padding(start = 16.dp)
+                ) {
+                    Text(if (isClicked) "✔" else buttonText)
+                }
+            }
+        }
+    }
+}
+
+
+/*
+@Composable
 fun OrderCard(order: Order, buttonText: String? = null, onClick: () -> Unit = {}) {
     Card(
         modifier = Modifier
@@ -65,14 +119,19 @@ fun OrderCard(order: Order, buttonText: String? = null, onClick: () -> Unit = {}
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(order.description, style = MaterialTheme.typography.bodyLarge)
+            Spacer(modifier = Modifier.weight(1f))
             if (buttonText != null) {
-                Button(onClick = onClick) {
+                Button(
+                    onClick = onClick,
+                    modifier = Modifier.padding(start = 16.dp)
+                ) {
                     Text(buttonText)
                 }
             }
         }
     }
 }
+*/
 
 // Sample data for testing
 @Composable

@@ -6,6 +6,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.practice.ApiRequestHelper
 import com.example.sodastreamprototyping.viewModel.NavigationViewModel
 
 @Composable
@@ -25,7 +26,10 @@ fun Navigation(startDestination: String)
         composable(route = Screen.SignIn.route) {
             SignInScreen(
                 onSignUpClick = { navController.navigate("sign_up") },
-                onSignInSuccess = { navController.navigate("home") },
+                onSignInSuccess = {
+                    navController.navigate("home")
+                    ApiRequestHelper.retrieveAllNeededData(navController.context)
+                                  },
                 navController = navController
             )
         }

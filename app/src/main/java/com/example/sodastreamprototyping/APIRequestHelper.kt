@@ -13,7 +13,12 @@ import org.json.JSONObject
 class ApiRequestHelper {
 
     companion object {
-        private const val BASE_URL = "http://10.0.2.2:8080"
+        private const val URL_BASE                  = "http://10.0.2.2:8080"
+        private const val URL_ENDING_AUTHENTICATE   = "/auth/authenticate"
+        private const val URL_ENDING_REGISTER       = "/auth/register"
+        private const val URL_ENDING_REFRESH_TOKEN  = "/auth/refresh"
+        private const val URL_ENDING_INVENTORY_ALL  = "/inventory/all"
+        private const val URL_ENDING_PAYMENT_INTENT = "/payments/create-payment-intent"
 
         /*
          * Obtains all data for singletons etc. used in the app.
@@ -38,7 +43,7 @@ class ApiRequestHelper {
             onSuccess: (JSONObject) -> Unit,
             onError: (String) -> Unit
         ) {
-            val url = "$BASE_URL/auth/authenticate"
+            val url = "$URL_BASE$URL_ENDING_AUTHENTICATE"
 
             val jsonParams = JSONObject().apply {
                 put("username", username)
@@ -71,7 +76,7 @@ class ApiRequestHelper {
             onSuccess: (JSONObject) -> Unit,
             onError: (String) -> Unit
         ) {
-            val url = "$BASE_URL/auth/register"
+            val url = "$URL_BASE$URL_ENDING_REGISTER"
 
             val jsonParams = JSONObject().apply {
                 put("firstname", firstname)
@@ -113,7 +118,7 @@ class ApiRequestHelper {
             onSuccess: () -> Unit,
             onError: (String) -> Unit
         ) {
-            val url = "$BASE_URL/auth/refresh"
+            val url = "$URL_BASE$URL_ENDING_REFRESH_TOKEN"
 
             val jsonParams = JSONObject().apply {
                 put("refreshToken", refreshToken)
@@ -148,7 +153,7 @@ class ApiRequestHelper {
             onSuccess: (List<String>) -> Unit,
             onError: (String) -> Unit
         ) {
-            val url = "$BASE_URL/inventory/all"
+            val url = "$URL_BASE$URL_ENDING_INVENTORY_ALL"
             val accessToken = UserPreferences.getAccessToken(context)
 
             val jsonObjectRequest = object : JsonObjectRequest(
@@ -211,7 +216,7 @@ class ApiRequestHelper {
             onSuccess: (String) -> Unit,
             onError: (String) -> Unit
         ) {
-            val url = "$BASE_URL/payments/create-payment-intent"
+            val url = "$URL_BASE$URL_ENDING_PAYMENT_INTENT"
             val jsonParams = JSONObject().apply {
                 put("amount", (amount * 100).toInt()) // Convert dollars to cents
                 put("currency", currency)
@@ -237,6 +242,70 @@ class ApiRequestHelper {
             val requestQueue: RequestQueue = Volley.newRequestQueue(context)
             requestQueue.add(jsonObjectRequest)
         }
+
+        //Fetching Order History
+        fun fetchOrderHistory(
+            context: Context,
+            onSuccess: (List<String>) -> Unit,
+            onError: (String) -> Unit
+        ){
+            //val url = "$BASE_URL/orders/history"
+            val url = "$URL_BASE$URL_ENDING_INVENTORY_ALL"
+            val accessToken = UserPreferences.getAccessToken(context)
+
+            val jsonObjectRequest = object : JsonObjectRequest(
+                Request.Method.GET, url, null,
+                { response ->
+                    try {
+                        val syrups = mutableListOf<String>()
+                        val ingredientsArray = response.getJSONArray("ingredients")
+                        for (i in 0 until ingredientsArray.length()) {
+                            val syrup = ingredientsArray.getString(i)
+                            syrups.add(syrup)
+                        }
+                        onSuccess(syrups)
+                    } catch (e: Exception) {
+                        Log.e("API_ERROR", e.toString())
+                        onError("Failed to parse ingredients")
+                    }
+                },
+                { error ->
+                    Log.e("API_ERROR", error.toString())
+                    if (error.networkResponse?.statusCode == 401) {
+                        // Access token might be expired, try refreshing
+                        val refreshToken = UserPreferences.getRefreshToken(context)
+                        if (refreshToken != null) {
+                            refreshAccessToken(
+                                context,
+                                refreshToken,
+                                onSuccess = {
+                                    // Retry the request after refreshing token
+                                    fetchIngredients(context, onSuccess, onError)
+                                },
+                                onError = { refreshError ->
+                                    onError(refreshError)
+                                }
+                            )
+                        } else {
+                            onError("Authentication failed. Please log in again.")
+                        }
+                    } else {
+                        onError(error.message ?: "An error occurred while fetching ingredients")
+                    }
+                }
+            ) {
+                override fun getHeaders(): MutableMap<String, String> {
+                    val headers = HashMap<String, String>()
+                    headers["Authorization"] = "Bearer $accessToken"
+                    return headers
+                }
+            }
+
+            val requestQueue: RequestQueue = Volley.newRequestQueue(context)
+            requestQueue.add(jsonObjectRequest)
+        }
+
+        //Adding to Order History
 
         // You can add other API methods below as needed, following the same pattern.
     }
