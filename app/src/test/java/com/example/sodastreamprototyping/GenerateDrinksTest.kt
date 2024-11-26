@@ -5,6 +5,7 @@ import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -23,6 +24,10 @@ import org.mockito.kotlin.mock
 class GenerateDrinksTest {
     lateinit var ai : TensorFlowAPI
 
+    @Before
+    fun setUpDispatcher(){
+        Dispatchers.setMain(StandardTestDispatcher())
+    }
     @Before
     fun initViewModel() {
         //create a simple mock AI outputs, this combination should allow for 6 unique drinks.
@@ -61,7 +66,6 @@ class GenerateDrinksTest {
 
     @Test
     fun expand() = runTest{
-        Dispatchers.setMain(Dispatchers.Default)
         val testBase = 0
         val viewModel = GenerateDrinksViewModel(ai)
 
@@ -74,7 +78,6 @@ class GenerateDrinksTest {
 
     @Test
     fun `expanding should not create duplicates`() = runTest{
-        Dispatchers.setMain(Dispatchers.Default)
         val testBase = 0
         val viewModel = GenerateDrinksViewModel(ai)
 
@@ -96,7 +99,6 @@ class GenerateDrinksTest {
 
     @Test
     fun reset() = runTest{
-        Dispatchers.setMain(Dispatchers.Default)
         val testBase = 0
         val viewModel = GenerateDrinksViewModel(ai)
         viewModel.expand(testBase)
