@@ -32,7 +32,7 @@ class ApiRequestHelper {
 
         // Function to handle login request
         fun makeLoginRequest(
-            context: Context,
+            requestQueue: RequestQueue,
             username: String,
             password: String,
             onSuccess: (JSONObject) -> Unit,
@@ -56,7 +56,6 @@ class ApiRequestHelper {
                 }
             )
 
-            val requestQueue: RequestQueue = Volley.newRequestQueue(context)
             requestQueue.add(jsonObjectRequest)
         }
 
