@@ -93,6 +93,11 @@ dependencies {
     // DataStore
     implementation(libs.androidx.datastore)
 
+    //Mock (unit testing)
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.mockito.inline)
+//    testImplementation(libs.turbine)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
 
 kapt {
@@ -102,3 +107,5 @@ kapt {
 hilt {
     enableAggregatingTask = true //gets rid of hilt warnings, also faster build times
 }
+
+android.testOptions.unitTests.all { test -> test.jvmArgs("-XX:+EnableDynamicAgentLoading") }
