@@ -8,8 +8,8 @@ object UserPreferences {
     private const val IS_LOGGED_IN = "isLoggedIn"
 
     // Method to log in and store tokens
-    fun login(sharedPreferences: SharedPreferences, access_token: String, refresh_token: String) {
-//        val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    fun login(context: Context, access_token: String, refresh_token: String) {
+        val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         sharedPreferences.edit()
             .putBoolean(IS_LOGGED_IN, true)
             .putString("AccessToken", access_token)

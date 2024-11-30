@@ -4,7 +4,6 @@ import android.content.SharedPreferences
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.android.volley.RequestQueue
 import com.example.practice.ApiRequestHelper
 import com.example.sodastreamprototyping.UserPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,7 +13,9 @@ import javax.inject.Inject
 import kotlin.text.isEmpty
 
 @HiltViewModel
-class SignInViewModel @Inject constructor(val requestQueue: RequestQueue, val sharedPreferences: SharedPreferences) :
+class SignInViewModel @Inject constructor(
+    val requestHelper: ApiRequestHelper,
+) :
     ViewModel() {
     val firstname = mutableStateOf("")
     val lastname = mutableStateOf("")
@@ -31,19 +32,12 @@ class SignInViewModel @Inject constructor(val requestQueue: RequestQueue, val sh
             errorMessage.value = "Please fill out all fields"
         } else {
             errorMessage.value = null
-            ApiRequestHelper.makeLoginRequest(requestQueue,
+            requestHelper.makeLoginRequest(
                 username = username.value,
                 password = password.value,
                 onSuccess = { response ->
                     try {
-                        val accessToken = response.getString("access_token")
-                        Log.d("ACCESS_TOKEN", "Access Token: $accessToken")
-                        val refreshToken = response.getString("refresh_token")
-                        Log.d("REFRESH_TOKEN", "Refresh Token: $refreshToken")
-                        UserPreferences.login(sharedPreferences, accessToken, refreshToken)
                         _signInSuccess.value = true
-                        //TODO update a value or something
-//                        onSignInSuccess()
                     } catch (e: Exception) {
                         Log.e("LOGIN_ERROR", e.toString())
                         errorMessage.value = "Failed to parse tokens"

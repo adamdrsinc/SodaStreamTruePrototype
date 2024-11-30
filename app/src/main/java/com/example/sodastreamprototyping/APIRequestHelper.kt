@@ -8,9 +8,43 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.example.sodastreamprototyping.Repository
 import com.example.sodastreamprototyping.UserPreferences
+import dagger.hilt.android.qualifiers.ApplicationContext
 import org.json.JSONObject
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class ApiRequestHelper {
+@Singleton
+class ApiRequestHelper @Inject constructor(@ApplicationContext val context: Context) {
+    val requestQueue: RequestQueue = Volley.newRequestQueue(context)
+//    val sharedPreferences = context.getSharedPreferences(UserPreferences)
+
+    // Function to handle login request
+    fun makeLoginRequest(
+        username: String,
+        password: String,
+        onSuccess: (JSONObject) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val url = "$BASE_URL/auth/authenticate"
+
+        val jsonParams = JSONObject().apply {
+            put("username", username)
+            put("password", password)
+        }
+
+        val jsonObjectRequest = JsonObjectRequest(
+            Request.Method.POST, url, jsonParams,
+            { response ->
+                UserPreferences.login(context, response.getString("access_token"), response.getString("refresh_token"))
+                onSuccess(response)
+            },
+            { error ->
+                Log.e("API_ERROR", error.toString())
+                onError(error.message ?: "An error occurred during login")
+            }
+        )
+        requestQueue.add(jsonObjectRequest)
+    }
 
     companion object {
         private const val BASE_URL = "http://10.0.2.2:8080"
@@ -28,35 +62,6 @@ class ApiRequestHelper {
                     Toast.makeText(context, "Error fetching ingredients: $error", Toast.LENGTH_SHORT).show()
                 }
             )
-        }
-
-        // Function to handle login request
-        fun makeLoginRequest(
-            requestQueue: RequestQueue,
-            username: String,
-            password: String,
-            onSuccess: (JSONObject) -> Unit,
-            onError: (String) -> Unit
-        ) {
-            val url = "$BASE_URL/auth/authenticate"
-
-            val jsonParams = JSONObject().apply {
-                put("username", username)
-                put("password", password)
-            }
-
-            val jsonObjectRequest = JsonObjectRequest(
-                Request.Method.POST, url, jsonParams,
-                { response ->
-                    onSuccess(response)
-                },
-                { error ->
-                    Log.e("API_ERROR", error.toString())
-                    onError(error.message ?: "An error occurred during login")
-                }
-            )
-
-            requestQueue.add(jsonObjectRequest)
         }
 
         // Function to handle sign-up request
