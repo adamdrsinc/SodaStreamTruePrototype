@@ -1,21 +1,17 @@
 package com.example.sodastreamprototyping
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.practice.ApiRequestHelper
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.example.sodastreamprototyping.viewModel.SignInViewModel
 
 
 @Composable
@@ -24,11 +20,15 @@ fun SignInScreen(
     onSignInSuccess: () -> Unit,
     navController: NavController
 ) {
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-    val context = LocalContext.current
+    val viewModel : SignInViewModel = hiltViewModel()
+    val signInSuccess by viewModel.signInSuccess.collectAsState()
 
+    val errorMessage = viewModel.errorMessage.value
+    LaunchedEffect(signInSuccess){
+        if(signInSuccess){
+            onSignInSuccess()
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -45,8 +45,8 @@ fun SignInScreen(
         )
 
         OutlinedTextField(
-            value = username,
-            onValueChange = { username = it },
+            value = viewModel.username.value,
+            onValueChange = { viewModel.username.value = it },
             label = { Text("Username") },
             modifier = Modifier.fillMaxWidth(),
         )
@@ -54,8 +54,8 @@ fun SignInScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
+            value = viewModel.password.value,
+            onValueChange = { viewModel.password.value = it },
             label = { Text("Password") },
             modifier = Modifier.fillMaxWidth(),
             visualTransformation = PasswordVisualTransformation(),
@@ -65,7 +65,7 @@ fun SignInScreen(
 
         if (errorMessage != null) {
             Text(
-                text = errorMessage ?: "",
+                text = errorMessage,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
@@ -73,32 +73,7 @@ fun SignInScreen(
 
         Button(
             onClick = {
-                if (username.isEmpty() || password.isEmpty()) {
-                    errorMessage = "Please fill out all fields"
-                } else {
-                    errorMessage = null
-                    ApiRequestHelper.makeLoginRequest(
-                        context = context,
-                        username = username,
-                        password = password,
-                        onSuccess = { response ->
-                            try {
-                                val accessToken = response.getString("access_token")
-                                Log.d("ACCESS_TOKEN", "Access Token: $accessToken")
-                                val refreshToken = response.getString("refresh_token")
-                                Log.d("REFRESH_TOKEN", "Refresh Token: $refreshToken")
-                                UserPreferences.login(context, accessToken, refreshToken)
-                                onSignInSuccess()
-                            } catch (e: Exception) {
-                                Log.e("LOGIN_ERROR", e.toString())
-                                errorMessage = "Failed to parse tokens"
-                            }
-                        },
-                        onError = { error ->
-                            errorMessage = error
-                        }
-                    )
-                }
+                viewModel.signIn()
             },
             modifier = Modifier.fillMaxWidth()
         ) {

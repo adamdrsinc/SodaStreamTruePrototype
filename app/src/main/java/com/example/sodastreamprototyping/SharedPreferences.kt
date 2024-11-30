@@ -1,6 +1,7 @@
 package com.example.sodastreamprototyping
 
 import android.content.Context
+import android.content.SharedPreferences
 
 object UserPreferences {
     private const val PREFS_NAME = "UserPreferences"
