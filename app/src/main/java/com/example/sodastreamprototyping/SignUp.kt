@@ -8,21 +8,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.practice.ApiRequestHelper
+import com.example.sodastreamprototyping.viewModel.SignInViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
 fun SignUpScreen(onSignInClick: () -> Unit) {
-    var firstname by remember { mutableStateOf("") }
-    var lastname by remember { mutableStateOf("") }
-    var username by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+    val viewModel: SignInViewModel = hiltViewModel()
+    val loginSuccess by viewModel.signInSuccess.collectAsState()
+
+
     val context = LocalContext.current
 
+    LaunchedEffect(loginSuccess) {
+        if(loginSuccess){
+            onSignInClick()
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -34,45 +39,40 @@ fun SignUpScreen(onSignInClick: () -> Unit) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(
-            value = firstname,
-            onValueChange = { firstname = it },
+        OutlinedTextField(value = viewModel.firstname.value,
+            onValueChange = { viewModel.firstname.value = it },
             label = { Text("First Name") },
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        OutlinedTextField(
-            value = lastname,
-            onValueChange = { lastname = it },
+        OutlinedTextField(value = viewModel.lastname.value,
+            onValueChange = { viewModel.lastname.value = it },
             label = { Text("Last Name") },
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        OutlinedTextField(
-            value = username,
-            onValueChange = { username = it },
+        OutlinedTextField(value = viewModel.username.value,
+            onValueChange = { viewModel.username.value = it },
             label = { Text("Username") },
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
+        OutlinedTextField(value = viewModel.email.value,
+            onValueChange = { viewModel.email.value = it },
             label = { Text("Email") },
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
+        OutlinedTextField(value = viewModel.password.value,
+            onValueChange = { viewModel.password.value = it },
             label = { Text("Password") },
             modifier = Modifier.fillMaxWidth(),
             visualTransformation = PasswordVisualTransformation()
@@ -80,9 +80,9 @@ fun SignUpScreen(onSignInClick: () -> Unit) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (errorMessage != null) {
+        if (viewModel.errorMessage.value != null) {
             Text(
-                text = errorMessage ?: "",
+                text = viewModel.errorMessage.value ?: "",
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
@@ -90,33 +90,8 @@ fun SignUpScreen(onSignInClick: () -> Unit) {
 
         Button(
             onClick = {
-                if (firstname.isEmpty() || lastname.isEmpty() || username.isEmpty() || email.isEmpty() || password.isEmpty()) {
-                    errorMessage = "Please fill out all fields"
-                } else {
-                    errorMessage = null
-                    CoroutineScope(Dispatchers.IO).launch {
-                        ApiRequestHelper.makeSignUpRequest(
-                            context = context,
-                            firstname = firstname,
-                            lastname = lastname,
-                            username = username,
-                            email = email,
-                            password = password,
-                            onSuccess = {
-                                CoroutineScope(Dispatchers.Main).launch{
-                                    onSignInClick()
-                                }
-                            },
-                            onError = { error ->
-                                CoroutineScope(Dispatchers.Main).launch {
-                                    errorMessage = error
-                                }
-                            }
-                        )
-                    }
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
+               viewModel.signUp()
+            }, modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = "Sign Up")
         }

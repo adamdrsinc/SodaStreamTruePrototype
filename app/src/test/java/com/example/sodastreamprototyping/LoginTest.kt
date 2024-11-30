@@ -36,6 +36,18 @@ class LoginTest {
                 val onFail = invocation.arguments[3] as Function1<String, Unit>
                 onFail(error)
             }
+
+            on{makeSignUpRequest(any(), any(), eq("new"), any(), any(), any(), any())} doAnswer { invocation ->
+                @Suppress("UNCHECKED_CAST")
+                val onSuccess = invocation.arguments[5] as (JSONObject) -> Unit
+                onSuccess(JSONObject())
+            }
+
+            on{makeSignUpRequest(any(), any(), eq("repeat"), any(), any(), any(), any())} doAnswer { invocation ->
+                @Suppress("UNCHECKED_CAST")
+                val onFail = invocation.arguments[6] as (String) -> Unit
+                onFail(error)
+            }
         }
 
     }
@@ -69,5 +81,41 @@ class LoginTest {
         assertFalse(viewModel.signInSuccess.value)
     }
 
+    @Test
+    fun `new account success`(){
+        val viewModel = SignInViewModel(apiRequestHelper)
+        viewModel.firstname.value = "new"
+        viewModel.lastname.value = "last"
+        viewModel.username.value = "new"
+        viewModel.email.value = "123@mail.com"
+        viewModel.password.value = "123"
+        viewModel.signUp()
+        assertTrue(viewModel.signInSuccess.value)
+    }
+
+    @Test
+    fun `signup failure shows error`(){
+        val viewModel = SignInViewModel(apiRequestHelper)
+        viewModel.firstname.value = "repeat"
+        viewModel.lastname.value = "last"
+        viewModel.username.value = "repeat"
+        viewModel.email.value = "123@mail.com"
+        viewModel.password.value = "123"
+        viewModel.signUp()
+        assertFalse(viewModel.signInSuccess.value)
+        assertEquals("sample error", viewModel.errorMessage.value)
+    }
+
+    @Test
+    fun `sign up with empty field shows error`(){
+        val viewModel = SignInViewModel(apiRequestHelper)
+        viewModel.lastname.value = "last"
+        viewModel.username.value = "new"
+        viewModel.email.value = "123@mail.com"
+        viewModel.password.value = "123"
+        viewModel.signUp()
+        assertFalse(viewModel.signInSuccess.value)
+        assertEquals("Please fill out all fields", viewModel.errorMessage.value)
+    }
 
 }

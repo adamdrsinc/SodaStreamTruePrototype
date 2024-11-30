@@ -46,6 +46,50 @@ class ApiRequestHelper @Inject constructor(@ApplicationContext val context: Cont
         requestQueue.add(jsonObjectRequest)
     }
 
+    // Function to handle sign-up request
+    fun makeSignUpRequest(
+        firstname: String,
+        lastname: String,
+        username: String,
+        email: String,
+        password: String,
+        onSuccess: (JSONObject) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val url = "$BASE_URL/auth/register"
+
+        val jsonParams = JSONObject().apply {
+            put("firstname", firstname)
+            put("lastname", lastname)
+            put("username", username)
+            put("email", email)
+            put("password", password)
+        }
+
+        val jsonObjectRequest = object : JsonObjectRequest(
+            Request.Method.POST, url, jsonParams,
+            { response ->
+                onSuccess(response)
+            },
+            { error ->
+                if (error.networkResponse != null) {
+                    val responseData = String(error.networkResponse.data, Charsets.UTF_8)
+                    Log.e("API_ERROR", "Response Code: ${error.networkResponse.statusCode}, Error data: $responseData")
+                }
+                Log.e("API_ERROR", "Volley Error: $error")
+                onError(error.message ?: "An error occurred during sign-up")
+            }
+        ) {
+            override fun getHeaders(): Map<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json"
+                return headers
+            }
+        }
+
+        requestQueue.add(jsonObjectRequest)
+    }
+
     companion object {
         private const val BASE_URL = "http://10.0.2.2:8080"
 
@@ -62,52 +106,6 @@ class ApiRequestHelper @Inject constructor(@ApplicationContext val context: Cont
                     Toast.makeText(context, "Error fetching ingredients: $error", Toast.LENGTH_SHORT).show()
                 }
             )
-        }
-
-        // Function to handle sign-up request
-        fun makeSignUpRequest(
-            context: Context,
-            firstname: String,
-            lastname: String,
-            username: String,
-            email: String,
-            password: String,
-            onSuccess: (JSONObject) -> Unit,
-            onError: (String) -> Unit
-        ) {
-            val url = "$BASE_URL/auth/register"
-
-            val jsonParams = JSONObject().apply {
-                put("firstname", firstname)
-                put("lastname", lastname)
-                put("username", username)
-                put("email", email)
-                put("password", password)
-            }
-
-            val jsonObjectRequest = object : JsonObjectRequest(
-                Request.Method.POST, url, jsonParams,
-                { response ->
-                    onSuccess(response)
-                },
-                { error ->
-                    if (error.networkResponse != null) {
-                        val responseData = String(error.networkResponse.data, Charsets.UTF_8)
-                        Log.e("API_ERROR", "Response Code: ${error.networkResponse.statusCode}, Error data: $responseData")
-                    }
-                    Log.e("API_ERROR", "Volley Error: $error")
-                    onError(error.message ?: "An error occurred during sign-up")
-                }
-            ) {
-                override fun getHeaders(): Map<String, String> {
-                    val headers = HashMap<String, String>()
-                    headers["Content-Type"] = "application/json"
-                    return headers
-                }
-            }
-
-            val requestQueue: RequestQueue = Volley.newRequestQueue(context)
-            requestQueue.add(jsonObjectRequest)
         }
 
         // Function to refresh access token
