@@ -6,9 +6,11 @@ import android.widget.Toast
 import com.android.volley.*
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.example.sodastreamprototyping.Drink
 import com.example.sodastreamprototyping.Repository
 import com.example.sodastreamprototyping.UserPreferences
 import dagger.hilt.android.qualifiers.ApplicationContext
+import org.json.JSONArray
 import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -235,6 +237,102 @@ class ApiRequestHelper @Inject constructor(@ApplicationContext val context: Cont
                     onError(error.message ?: "An error occurred while fetching payment intent")
                 }
             )
+
+            val requestQueue: RequestQueue = Volley.newRequestQueue(context)
+            requestQueue.add(jsonObjectRequest)
+        }
+
+        // function to fetch the user's saved drinks
+        fun fetchSavedDrinks(
+            context: Context,
+            onSuccess: (List<Drink>) -> Unit,
+            onError: (String) -> Unit
+        ) {
+            val url = "$BASE_URL/orders/favorites"
+            val accessToken = UserPreferences.getAccessToken(context)
+
+            val jsonObjectRequest = object : JsonObjectRequest(
+                Request.Method.GET, url, null,
+                { response ->
+                    try {
+                        val savedDrinks = mutableListOf<Drink>()
+                        val drinksArray = JSONArray(response.toString())
+
+                        for (i in 0 until drinksArray.length()) {
+                            val drinkJson = drinksArray.getJSONObject(i)
+
+                            // Extract base ingredient
+                            val baseIngredientId = drinkJson.getJSONObject("baseIngredientId").getInt("id")
+
+                            // Extract flavor ingredients
+                            val flavorIngredients = mutableListOf<Pair<Int, Int>>()
+                            val flavorIngredientsArray = drinkJson.getJSONArray("flavorIngredients")
+
+                            for (j in 0 until flavorIngredientsArray.length()) {
+                                val flavorJson = flavorIngredientsArray.getJSONObject(j)
+                                val flavorId = flavorJson.getInt("flavorIngredientId")
+                                val quantity = flavorJson.getInt("quantity")
+                                flavorIngredients.add(Pair(flavorId, quantity))
+                            }
+
+                            // Create Drink object
+                            val drink = Drink(
+                                ingredients = flavorIngredients,
+                                name = "Saved Drink ${i + 1}", // You might want to modify this later
+                                baseDrink = baseIngredientId,
+                                isCustom = true
+                            )
+
+                            savedDrinks.add(drink)
+                        }
+
+                        onSuccess(savedDrinks)
+                    } catch (e: Exception) {
+                        Log.e("API_ERROR", e.toString())
+                        onError("Failed to parse saved drinks")
+                    }
+                },
+                { error ->
+                    Log.e("API_ERROR", "Full error: ${error.toString()}")
+
+                    // If possible, get the response body for more details
+                    if (error.networkResponse != null) {
+                        val responseBody = String(error.networkResponse.data, Charsets.UTF_8)
+                        Log.e("API_ERROR", "Response Body: $responseBody")
+                        Log.e("API_ERROR", "Response Code: ${error.networkResponse.statusCode}")
+                    }
+
+                    onError(error.message ?: "An error occurred while fetching saved drinks")
+
+                    if (error.networkResponse?.statusCode == 401) {
+                        // Access token might be expired, try refreshing
+                        val refreshToken = UserPreferences.getRefreshToken(context)
+                        if (refreshToken != null) {
+                            refreshAccessToken(
+                                context,
+                                refreshToken,
+                                onSuccess = {
+                                    // Retry the request after refreshing token
+                                    fetchSavedDrinks(context, onSuccess, onError)
+                                },
+                                onError = { refreshError ->
+                                    onError(refreshError)
+                                }
+                            )
+                        } else {
+                            onError("Authentication failed. Please log in again.")
+                        }
+                    } else {
+                        onError(error.message ?: "An error occurred while fetching saved drinks")
+                    }
+                }
+            ) {
+                override fun getHeaders(): MutableMap<String, String> {
+                    val headers = HashMap<String, String>()
+                    headers["Authorization"] = "Bearer $accessToken"
+                    return headers
+                }
+            }
 
             val requestQueue: RequestQueue = Volley.newRequestQueue(context)
             requestQueue.add(jsonObjectRequest)
