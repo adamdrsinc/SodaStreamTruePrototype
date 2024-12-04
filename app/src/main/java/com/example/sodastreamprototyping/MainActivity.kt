@@ -35,7 +35,12 @@ class MainActivity : ComponentActivity() {
                                     refreshToken = refreshToken,
                                     onSuccess = {
                                         // Proceed after refreshing token
-                                        ApiRequestHelper.retrieveAllNeededData(this@MainActivity)
+                                        //ApiRequestHelper.retrieveAllNeededData(this@MainActivity)
+
+                                        Repository(
+                                            context = this@MainActivity
+                                        )
+
                                         startDestination = Screen.Home.route
                                     },
                                     onError = { error ->
@@ -50,7 +55,11 @@ class MainActivity : ComponentActivity() {
                             }
                         } else {
                             // Access token exists, proceed
-                            ApiRequestHelper.retrieveAllNeededData(this@MainActivity)
+                            //ApiRequestHelper.retrieveAllNeededData(this@MainActivity)
+
+                            Repository(
+                                context = this@MainActivity
+                            )
                             startDestination = Screen.Home.route
                         }
                     } else {

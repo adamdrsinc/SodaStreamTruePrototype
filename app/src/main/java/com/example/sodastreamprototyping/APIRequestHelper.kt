@@ -96,22 +96,6 @@ class ApiRequestHelper @Inject constructor(@ApplicationContext val context: Cont
     companion object {
         private const val BASE_URL = "http://10.0.2.2:8080"
 
-        /*
-         * Obtains all data for singletons etc. used in the app.
-         */
-        fun retrieveAllNeededData(context: Context) {
-            getIngredients(
-                context = context,
-                onSuccess = { ingredients ->
-                    Repository.drinkFlavorsFromDB = ingredients["ingredients"]!!
-                    Repository.basesFromDB = ingredients["bases"]!!
-                },
-                onError = { error ->
-                    Toast.makeText(context, "Error fetching ingredients: $error", Toast.LENGTH_SHORT).show()
-                }
-            )
-        }
-
         // Function to refresh access token
         fun refreshAccessToken(
             context: Context,
@@ -151,10 +135,10 @@ class ApiRequestHelper @Inject constructor(@ApplicationContext val context: Cont
         // Function to fetch ingredients data
         fun getIngredients(
             context: Context,
-            onSuccess: (Map<String, MutableList<Int>>) -> Unit,
+            onSuccess: (Map<String, MutableList<String>>) -> Unit,
             onError: (String) -> Unit
         ) {
-            val url = "$BASE_URL/inventory/all"
+            val url = "$BASE_URL/inventory/available"
             val accessToken = UserPreferences.getAccessToken(context)
 
             val jsonObjectRequest = object : JsonArrayRequest(
@@ -162,18 +146,18 @@ class ApiRequestHelper @Inject constructor(@ApplicationContext val context: Cont
                 { response ->
                     try {
                         Log.i("API_RESPONSE", response.toString())
-                        val bases = mutableListOf<Int>()
-                        val ingredients = mutableListOf<Int>()
+                        val bases = mutableListOf<String>()
+                        val ingredients = mutableListOf<String>()
 
                         for (i in 0 until response.length()) {
                             val jsonObject = response.getJSONObject(i)
-                            val ingredientId = jsonObject.getInt("ingredientId")
+                            val name = jsonObject.getString("name")
                             val isBase = jsonObject.getBoolean("isBase")
 
                             if (isBase) {
-                                bases.add(ingredientId)
+                                bases.add(name)
                             } else {
-                                ingredients.add(ingredientId)
+                                ingredients.add(name)
                             }
                         }
 

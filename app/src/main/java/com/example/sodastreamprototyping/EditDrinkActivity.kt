@@ -41,6 +41,8 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
     )
     val newDrink by editDrinkViewModel.drink.collectAsState()
     val suggestions by editDrinkViewModel.suggestion.collectAsState()
+    val bases by editDrinkViewModel.bases.collectAsState()
+    val flavors by editDrinkViewModel.flavors.collectAsState()
 
     var buttonText = "Save Changes"
     var titleText: String = "Edit Drink"
@@ -50,19 +52,6 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
         buttonText = "Add Drink"
     }
 
-    //TODO: Get drink flavors from DB, not from resources
-    /*val drinkFlavors =
-        if(Repository.drinkFlavorsFromDB != null)
-            context.resources.getStringArray(R.array.drink_flavors)
-        else
-            Repository.drinkFlavorsFromDB.toTypedArray()*/
-
-
-    val drinkFlavors =
-        if(Repository.drinkFlavorsFromDB != null)
-            Repository.drinkFlavorsFromDB
-        else
-            context.resources.getStringArray(R.array.drink_flavors)
 
     MainLayout(navController = navController) { innerPadding ->
         Column(
@@ -91,9 +80,19 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
 
             // Accordion for ingredients
             SectionTitle("Ingredients")
-            AccordionSectionIngredientRow(title = "Ingredients", items = drinkFlavors as Array<String>, suggestions) {
-                editDrinkViewModel.addIngredient(it)
+            if(flavors.isEmpty())
+            {
+                Text("Ingredients could not be retrieved. Refresh the app.")
             }
+            else
+            {
+                AccordionSectionIngredientRow(title = "Ingredients", items = flavors, suggestions) {
+                    editDrinkViewModel.addIngredient(it)
+                }
+            }
+            /*AccordionSectionIngredientRow(title = "Ingredients", items = drinkFlavors, suggestions) {
+                editDrinkViewModel.addIngredient(it)
+            }*/
 
             Spacer(modifier = Modifier.height(18.dp))
 
@@ -150,7 +149,7 @@ fun SectionTitle(
 
 @Composable
 fun AccordionSectionIngredientRow(
-    title: String, items: Array<String>, suggestions: List<Int>, selectFlavor: (Int) -> Boolean
+    title: String, items: List<String>, suggestions: List<Int>, selectFlavor: (Int) -> Boolean
 ) {
     var expanded by remember { mutableStateOf(false) }
 
