@@ -54,6 +54,13 @@ fun Navigation(startDestination: String)
             OrderHistoryScreenDemo(navController)
         }
 
+        composable(route = Screen.Account.route) {
+            AccountScreen(navController)
+        }
+        composable(route = Screen.Settings.route) {
+            SettingsScreen(navController)
+        }
+
     }
 
 }

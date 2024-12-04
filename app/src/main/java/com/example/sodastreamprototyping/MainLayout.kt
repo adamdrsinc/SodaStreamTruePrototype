@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,6 +33,8 @@ fun MainLayout(
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
+//            val userName = UserPreferences.getUserName(context)
+
             Column(
                 modifier = Modifier
                     .fillMaxHeight()
@@ -40,25 +43,32 @@ fun MainLayout(
                     .padding(16.dp)
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
+                val userName = ""
                 Text(
-                    text = "John Doe",
+                    text = userName,
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
                 NavigationDrawerItem(
-                    icon = { Icon(Icons.Default.Settings, contentDescription = null) },
+                    icon = { Icon(Icons.Default.AccountCircle, contentDescription = null) },
                     label = { Text("Account") },
                     selected = false,
-                    onClick = { scope.launch { drawerState.close() } }
+                    onClick = {
+                        navController.navigate(Screen.Account.route)
+                        scope.launch { drawerState.close() }
+                    }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Default.History, contentDescription = null) },
                     label = { Text("Order History") },
                     selected = false,
-                    onClick = { scope.launch { drawerState.close() } }
+                    onClick = {
+                        navController.navigate(Screen.OrderHistory.route)
+                        scope.launch { drawerState.close() }
+                    }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 NavigationDrawerItem(
@@ -66,7 +76,7 @@ fun MainLayout(
                     label = { Text("Settings") },
                     selected = false,
                     onClick = {
-                        navController.navigate(Screen.OrderHistory.route)
+                        navController.navigate(Screen.Settings.route)
                         scope.launch { drawerState.close() }
                     }
                 )
@@ -75,8 +85,8 @@ fun MainLayout(
                     onClick = {
                         UserPreferences.logout(context)
                         scope.launch { drawerState.close() }
-                        navController.navigate("sign_in") {
-                            popUpTo("home") { inclusive = true }  // Adjust the route as necessary
+                        navController.navigate(Screen.SignIn.route) {
+                            popUpTo(Screen.Home.route) { inclusive = true }  // Adjust the route as necessary
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),

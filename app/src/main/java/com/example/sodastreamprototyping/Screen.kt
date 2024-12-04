@@ -8,6 +8,9 @@ sealed class Screen(val route: String) {
     object Edit: Screen("edit")
     object NewDrink: Screen("new_drink")
     object OrderHistory: Screen("order_history")
+    object Account: Screen("account")
+    object Settings: Screen("settings")
+
 
 
     fun withArgs(vararg args: String): String{
