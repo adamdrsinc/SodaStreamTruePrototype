@@ -6,6 +6,7 @@ import android.widget.Toast
 import com.android.volley.*
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.example.sodastreamprototyping.Drink
 import com.example.sodastreamprototyping.Repository
 import com.example.sodastreamprototyping.UserPreferences
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -239,6 +240,25 @@ class ApiRequestHelper @Inject constructor(@ApplicationContext val context: Cont
             val requestQueue: RequestQueue = Volley.newRequestQueue(context)
             requestQueue.add(jsonObjectRequest)
         }
+
+
+        fun createOrder(
+            context: Context,
+            drink: Drink,
+            onSuccess: () -> Unit,
+            onError: () -> Unit
+        ){
+
+        }
+
+        fun getOrderHistory(
+            context: Context,
+            onSuccess: () -> Unit,
+            onError: () -> Unit
+        ){
+
+        }
+
 
         // You can add other API methods below as needed, following the same pattern.
     }
