@@ -100,6 +100,7 @@ fun ShoppingBasket(
                         paymentIntentClientSecret = clientSecret
                         isLoading = false
                         presentPaymentSheet(paymentSheetLauncher, clientSecret)
+
                     },
                     onError = { errorMessage ->
                         isLoading = false
@@ -148,6 +149,16 @@ private fun onPaymentSheetResult(
         is PaymentSheetResult.Completed -> {
             Toast.makeText(context, "Payment Successful", Toast.LENGTH_LONG).show()
             Log.i("PaymentSuccess", "Payment completed successfully.")
+
+            ApiRequestHelper.createOrder(context, Basket.basketDrinks,
+                onSuccess = {
+                    Toast.makeText(context, "ORDER CREATED", Toast.LENGTH_SHORT).show()
+                },
+                onError = {
+                    Toast.makeText(context, "ORDER FAILED", Toast.LENGTH_SHORT).show()
+                }
+
+            )
             //Basket.basketDrinks.clear()
         }
         is PaymentSheetResult.Canceled -> {

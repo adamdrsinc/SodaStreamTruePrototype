@@ -28,7 +28,7 @@ fun OrderHistoryScreen(orders: List<Order>) {
 
     val orderHistory = mutableListOf<MutableList<String>>()
 
-    ApiRequestHelper.fetchOrderHistory(
+    /*ApiRequestHelper.fetchOrderHistory(
         context,
         onSuccess = {
             orders ->
@@ -38,7 +38,7 @@ fun OrderHistoryScreen(orders: List<Order>) {
         },
         onError = {
 
-        })
+        })*/
 
     Column(modifier = Modifier.fillMaxSize()) {
         OpenOrdersSection(openOrders)

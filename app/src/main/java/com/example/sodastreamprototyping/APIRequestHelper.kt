@@ -4,12 +4,14 @@ import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import com.android.volley.*
+import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.example.sodastreamprototyping.Drink
 import com.example.sodastreamprototyping.Repository
 import com.example.sodastreamprototyping.UserPreferences
 import dagger.hilt.android.qualifiers.ApplicationContext
+import org.json.JSONArray
 import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -98,10 +100,11 @@ class ApiRequestHelper @Inject constructor(@ApplicationContext val context: Cont
          * Obtains all data for singletons etc. used in the app.
          */
         fun retrieveAllNeededData(context: Context) {
-            fetchIngredients(
+            getIngredients(
                 context = context,
                 onSuccess = { ingredients ->
-                    Repository.drinkFlavorsFromDB = ingredients
+                    Repository.drinkFlavorsFromDB = ingredients["ingredients"]!!
+                    Repository.basesFromDB = ingredients["bases"]!!
                 },
                 onError = { error ->
                     Toast.makeText(context, "Error fetching ingredients: $error", Toast.LENGTH_SHORT).show()
@@ -146,25 +149,36 @@ class ApiRequestHelper @Inject constructor(@ApplicationContext val context: Cont
         }
 
         // Function to fetch ingredients data
-        fun fetchIngredients(
+        fun getIngredients(
             context: Context,
-            onSuccess: (List<String>) -> Unit,
+            onSuccess: (Map<String, MutableList<Int>>) -> Unit,
             onError: (String) -> Unit
         ) {
             val url = "$BASE_URL/inventory/all"
             val accessToken = UserPreferences.getAccessToken(context)
 
-            val jsonObjectRequest = object : JsonObjectRequest(
+            val jsonObjectRequest = object : JsonArrayRequest(
                 Request.Method.GET, url, null,
                 { response ->
                     try {
-                        val syrups = mutableListOf<String>()
-                        val ingredientsArray = response.getJSONArray("ingredients")
-                        for (i in 0 until ingredientsArray.length()) {
-                            val syrup = ingredientsArray.getString(i)
-                            syrups.add(syrup)
+                        Log.i("API_RESPONSE", response.toString())
+                        val bases = mutableListOf<Int>()
+                        val ingredients = mutableListOf<Int>()
+
+                        for (i in 0 until response.length()) {
+                            val jsonObject = response.getJSONObject(i)
+                            val ingredientId = jsonObject.getInt("ingredientId")
+                            val isBase = jsonObject.getBoolean("isBase")
+
+                            if (isBase) {
+                                bases.add(ingredientId)
+                            } else {
+                                ingredients.add(ingredientId)
+                            }
                         }
-                        onSuccess(syrups)
+
+                        val syrupMap = mapOf("bases" to bases, "ingredients" to ingredients)
+                        onSuccess(syrupMap)
                     } catch (e: Exception) {
                         Log.e("API_ERROR", e.toString())
                         onError("Failed to parse ingredients")
@@ -181,7 +195,7 @@ class ApiRequestHelper @Inject constructor(@ApplicationContext val context: Cont
                                 refreshToken,
                                 onSuccess = {
                                     // Retry the request after refreshing token
-                                    fetchIngredients(context, onSuccess, onError)
+                                    getIngredients(context, onSuccess, onError)
                                 },
                                 onError = { refreshError ->
                                     onError(refreshError)
@@ -244,11 +258,51 @@ class ApiRequestHelper @Inject constructor(@ApplicationContext val context: Cont
 
         fun createOrder(
             context: Context,
-            drink: Drink,
+            drinkList: List<Drink>,
             onSuccess: () -> Unit,
-            onError: () -> Unit
-        ){
+            onError: (String) -> Unit
+        ) {
+            val url = "$BASE_URL/orders/create"
+            val accessToken = UserPreferences.getAccessToken(context)
 
+            val jsonParams = JSONArray().apply {
+                for (drink in drinkList) {
+                    val drinkJson = JSONObject().apply {
+                        put("baseIngredientId", drink.baseDrink)
+                        val flavorIngredientsArray = JSONArray().apply {
+                            for (flavor in drink.ingredients) {
+                                val flavorJson = JSONObject().apply {
+                                    put("flavorIngredientId", flavor.first)
+                                    put("quantity", flavor.second)
+                                }
+                                put(flavorJson)
+                            }
+                        }
+                        put("flavorIngredients", flavorIngredientsArray)
+                    }
+                    put(drinkJson)
+                }
+            }
+
+            val jsonObjectRequest = object : JsonArrayRequest(
+                Request.Method.POST, url, jsonParams,
+                { response ->
+                    onSuccess()
+                },
+                { error ->
+                    Log.e("API_ERROR", error.toString())
+                    onError(error.message ?: "An error occurred while creating the order")
+                }
+            ) {
+                override fun getHeaders(): MutableMap<String, String> {
+                    val headers = HashMap<String, String>()
+                    headers["Authorization"] = "Bearer $accessToken"
+                    return headers
+                }
+            }
+
+            val requestQueue: RequestQueue = Volley.newRequestQueue(context)
+            requestQueue.add(jsonObjectRequest)
         }
 
         fun getOrderHistory(
@@ -256,8 +310,58 @@ class ApiRequestHelper @Inject constructor(@ApplicationContext val context: Cont
             onSuccess: () -> Unit,
             onError: () -> Unit
         ){
+            val url = "${BASE_URL}/orders/history"
+
+            val jsonObjectRequest = object : JsonArrayRequest(
+                Request.Method.GET, url, null,
+                { response ->
+                    onSuccess()
+                },
+                { error ->
+                    Log.e("API_ERROR", error.toString())
+                    onError()
+                }
+            ){
+                override fun getHeaders(): MutableMap<String, String> {
+                    val headers = HashMap<String, String>()
+                    headers["Authorization"] = "Bearer ${UserPreferences.getAccessToken(context)}"
+                    return headers
+                }
+            }
+
+            val requestQueue: RequestQueue = Volley.newRequestQueue(context)
+            requestQueue.add(jsonObjectRequest)
 
         }
+
+        /*fun completeOrder(
+            context: Context,
+            onSuccess: () -> Unit,
+            onError: () -> Unit
+        ){
+            //Add the order id to the endpoint
+            var urlBase = "/orders/here/"
+
+            val jsonObjectRequest = object : JsonObjectRequest(
+                Request.Method.POST, url, jsonParams,
+                {
+                    response ->
+                    onSuccess()
+                },
+                {
+                    error ->
+                    Log.e("API_ERROR", error.toString())
+                    onError()
+                }
+
+            ){
+                override fun getHeaders(): MutableMap<String, String> {
+                    val headers = HashMap<String, String>()
+                    headers["Authorization"] = "Bearer ${UserPreferences.getAccessToken(context)}"
+                    return headers
+                }
+            }
+        }*/
 
 
         // You can add other API methods below as needed, following the same pattern.

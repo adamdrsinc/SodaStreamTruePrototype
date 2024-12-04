@@ -51,11 +51,18 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
     }
 
     //TODO: Get drink flavors from DB, not from resources
-    val drinkFlavors =
-        if(Repository.drinkFlavorsFromDB.isEmpty())
+    /*val drinkFlavors =
+        if(Repository.drinkFlavorsFromDB != null)
             context.resources.getStringArray(R.array.drink_flavors)
         else
-            Repository.drinkFlavorsFromDB.toTypedArray()
+            Repository.drinkFlavorsFromDB.toTypedArray()*/
+
+
+    val drinkFlavors =
+        if(Repository.drinkFlavorsFromDB != null)
+            Repository.drinkFlavorsFromDB
+        else
+            context.resources.getStringArray(R.array.drink_flavors)
 
     MainLayout(navController = navController) { innerPadding ->
         Column(
@@ -84,7 +91,7 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
 
             // Accordion for ingredients
             SectionTitle("Ingredients")
-            AccordionSectionIngredientRow(title = "Ingredients", items = drinkFlavors, suggestions) {
+            AccordionSectionIngredientRow(title = "Ingredients", items = drinkFlavors as Array<String>, suggestions) {
                 editDrinkViewModel.addIngredient(it)
             }
 
