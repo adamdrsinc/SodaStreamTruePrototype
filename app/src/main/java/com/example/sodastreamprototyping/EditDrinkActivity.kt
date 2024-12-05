@@ -36,9 +36,10 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
 
     val context = LocalContext.current
     val scrollState = rememberScrollState()
-    val editDrinkViewModel = hiltViewModel<EditDrinkViewModel, EditDrinkViewModel.Factory>(
-        creationCallback = { factory -> factory.create(drink = drink.copy()) }
-    )
+    val editDrinkViewModel =
+        hiltViewModel<EditDrinkViewModel, EditDrinkViewModel.Factory>(creationCallback = { factory ->
+            factory.create(drink = drink.copy())
+        })
     val newDrink by editDrinkViewModel.drink.collectAsState()
     val suggestions by editDrinkViewModel.suggestion.collectAsState()
 
@@ -52,10 +53,8 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
 
     //TODO: Get drink flavors from DB, not from resources
     val drinkFlavors =
-        if(Repository.drinkFlavorsFromDB.isEmpty())
-            context.resources.getStringArray(R.array.drink_flavors)
-        else
-            Repository.drinkFlavorsFromDB.toTypedArray()
+        if (Repository.drinkFlavorsFromDB.isEmpty()) context.resources.getStringArray(R.array.drink_flavors)
+        else Repository.drinkFlavorsFromDB.toTypedArray()
 
     MainLayout(navController = navController) { innerPadding ->
         Column(
@@ -74,7 +73,8 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
             // Display current selections
             SectionTitle("Current Drink Summary")
             CurrentDrinkSummary(newDrink,
-                { editDrinkViewModel.addIngredient(it) }, { editDrinkViewModel.removeIngredient(it) })
+                { editDrinkViewModel.addIngredient(it) },
+                { editDrinkViewModel.removeIngredient(it) })
             Spacer(modifier = Modifier.height(18.dp))
 
             //Drink Bases Dropdown
@@ -84,9 +84,13 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
 
             // Accordion for ingredients
             SectionTitle("Ingredients")
-            AccordionSectionIngredientRow(title = "Ingredients", items = drinkFlavors, suggestions) {
-                editDrinkViewModel.addIngredient(it)
-            }
+            AccordionSectionIngredientRow(title = "Ingredients",
+                items = drinkFlavors,
+                suggestions,
+                newDrink.getAllIngredientQuantity(drinkFlavors.size),
+                { editDrinkViewModel.addIngredient(it) },
+                { editDrinkViewModel.removeIngredient(it) })
+
 
             Spacer(modifier = Modifier.height(18.dp))
 
@@ -96,15 +100,11 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
 
             // TextField to change the drink name
             SectionTitle("Drink Name")
-            TextField(
-                value = newDrink.name,
-                onValueChange = {
-                    editDrinkViewModel.setName(it)
-                },
-                label = { Text("Drink Name") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
+            TextField(value = newDrink.name, onValueChange = {
+                editDrinkViewModel.setName(it)
+            }, label = { Text("Drink Name") }, modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
             )
             Spacer(modifier = Modifier.height(18.dp))
 
@@ -113,9 +113,7 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
                 onClick = {
                     editDrinkViewModel.saveDrink()
                     navController.popBackStack()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
+                }, modifier = Modifier.fillMaxWidth()
             ) {
                 Text(buttonText)
             }
@@ -125,8 +123,7 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
 
 @Composable
 fun SectionTitle(
-    text: String, color: Color = Color.hsl(hue = 270f, saturation = 0.5f, lightness = 0.8f),
-    centered: Boolean = false
+    text: String, color: Color = Color.hsl(hue = 270f, saturation = 0.5f, lightness = 0.8f), centered: Boolean = false
 ) {
     Text(
         text = text,
@@ -143,26 +140,26 @@ fun SectionTitle(
 
 @Composable
 fun AccordionSectionIngredientRow(
-    title: String, items: Array<String>, suggestions: List<Int>, selectFlavor: (Int) -> Boolean
+    title: String,
+    items: Array<String>,
+    suggestions: List<Int>,
+    quantities: IntArray,
+    increment: (Int) -> Boolean,
+    decrement: (Int) -> Boolean
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .clickable { expanded = !expanded }
-    ) {
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .padding(8.dp)
+        .clickable { expanded = !expanded }) {
         Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
+            verticalAlignment = Alignment.CenterVertically, modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
         ) {
             Text(
-                text = title,
-                fontSize = 20.sp,
-                modifier = Modifier.weight(1f)
+                text = title, fontSize = 20.sp, modifier = Modifier.weight(1f)
             )
             Icon(
                 imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
@@ -171,21 +168,24 @@ fun AccordionSectionIngredientRow(
         }
 
         AnimatedVisibility(
-            visible = expanded,
-            enter = expandVertically(),
-            exit = shrinkVertically()
+            visible = expanded, enter = expandVertically(), exit = shrinkVertically()
         ) {
             if (!items.isEmpty()) {
                 Column {
                     items.forEachIndexed { index, item ->
-                        IngredientRow(ingredient = Pair(index, item), suggestions.contains(index), selectFlavor)
+                        IngredientRow(
+                            ingredient = Pair(index, item),
+                            suggestions.contains(index),
+                            quantities[index],
+                            increment,
+                            decrement
+                        )
                     }
                 }
             } else {
                 Column {
                     Text(
-                        text = "Ingredients could not be retrieved. Refresh the app.",
-                        textAlign = TextAlign.Center
+                        text = "Ingredients could not be retrieved. Refresh the app.", textAlign = TextAlign.Center
                     )
                 }
 
@@ -195,14 +195,22 @@ fun AccordionSectionIngredientRow(
 }
 
 @Composable
-fun IngredientRow(ingredient: Pair<Int, String>, aiRecommended: Boolean = false, select: (Int) -> Boolean) {
+fun IngredientRow(
+    ingredient: Pair<Int, String>,
+    aiRecommended: Boolean = false,
+    quantity: Int,
+    increment: (Int) -> Boolean,
+    decrement: (Int) -> Boolean
+) {
     val context = LocalContext.current
 
-    val modifier = Modifier.background(Color.Gray.copy(alpha = 0.25f))
+
+    val modifier = Modifier
+        .background(Color.Gray.copy(alpha = 0.25f))
 //        .background(if (aiRecommended) Color.Blue.copy(alpha = 0.25f) else Color.Transparent)
         .fillMaxWidth()
         .clickable {
-            if (!select(ingredient.first)) {
+            if (!increment(ingredient.first)) {
                 Toast
                     .makeText(context, "Syrup count cannot exceed ${Drink.MAX_PUMP_COUNT}", Toast.LENGTH_SHORT)
                     .show()
@@ -212,18 +220,61 @@ fun IngredientRow(ingredient: Pair<Int, String>, aiRecommended: Boolean = false,
 
     Row(
         modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(){
+        Box() {
             Text(
-                text = ingredient.second,
-                fontSize = 16.sp,
-                modifier = Modifier.padding(end = 20.dp, top=8.dp)
+                text = ingredient.second, fontSize = 16.sp, modifier = Modifier.padding(end = 20.dp, top = 8.dp)
             )
-            if(aiRecommended){
+            if (aiRecommended) {
 //                Text("✨", fontSize = 16.sp, modifier = Modifier.align(Alignment.TopEnd))
-                Image(painter = painterResource(R.drawable.baseline_star_24), contentDescription = null, modifier =
-                Modifier.align(Alignment.TopEnd))
+                Image(
+                    painter = painterResource(R.drawable.baseline_star_24),
+                    contentDescription = null,
+                    modifier = Modifier.align(Alignment.TopEnd)
+                )
+            }
+        }
+
+
+        if (quantity > 0) {
+//            Spacer(modifier = Modifier.fillMaxWidth())
+            Box(Modifier.fillMaxWidth()) {
+                Row(Modifier.align(Alignment.TopEnd)) {
+
+                    IconButton(onClick = {
+                        if (!decrement(ingredient.first)) {
+                            Toast.makeText(
+                                context, "Syrup count cannot ${Drink.MAX_PUMP_COUNT}", Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }) {
+                        Text(
+                            text = "-",
+                            fontSize = 18.sp,
+                            color = Color.Red,
+//                        modifier = Modifier.align(Alignment.CenterVertically)
+                        )
+                    }
+
+                    // Quantity Display
+                    Text(
+                        text = quantity.toString(),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Light,
+                        modifier = Modifier.padding(horizontal = 8.dp).align(Alignment.CenterVertically)
+                    )
+
+                    // Increment Button
+                    IconButton(onClick = {
+                        if (!increment(ingredient.first)) {
+                            Toast.makeText(
+                                context, "Syrup count cannot exceed ${Drink.MAX_PUMP_COUNT}", Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }) {
+                        Text(text = "+", fontSize = 18.sp, color = Color.Green)
+                    }
+                }
             }
         }
     }
@@ -248,9 +299,7 @@ fun CurrentDrinkSummary(drink: Drink, increment: (Int) -> Boolean, decrement: (I
 
         if (drink.ingredients.isEmpty()) {
             Text(
-                text = "No ingredients added yet.",
-                fontSize = 16.sp,
-                color = Color.Gray
+                text = "No ingredients added yet.", fontSize = 16.sp, color = Color.Gray
             )
         } else {
             drink.ingredients.forEachIndexed { index, (ingredient, quantity) ->
@@ -261,23 +310,17 @@ fun CurrentDrinkSummary(drink: Drink, increment: (Int) -> Boolean, decrement: (I
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = drinkFlavors[ingredient],
-                        fontSize = 16.sp,
-                        modifier = Modifier.weight(1f)
+                        text = drinkFlavors[ingredient], fontSize = 16.sp, modifier = Modifier.weight(1f)
                     )
 
                     // Decrement Button
-                    IconButton(
-                        onClick = {
-                            if (!decrement(ingredient)) {
-                                Toast.makeText(
-                                    context,
-                                    "Syrup count cannot ${Drink.MAX_PUMP_COUNT}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
+                    IconButton(onClick = {
+                        if (!decrement(ingredient)) {
+                            Toast.makeText(
+                                context, "Syrup count cannot ${Drink.MAX_PUMP_COUNT}", Toast.LENGTH_SHORT
+                            ).show()
                         }
-                    ) {
+                    }) {
                         Text(text = "-", fontSize = 18.sp, color = Color.Red)
                     }
 
@@ -290,17 +333,13 @@ fun CurrentDrinkSummary(drink: Drink, increment: (Int) -> Boolean, decrement: (I
                     )
 
                     // Increment Button
-                    IconButton(
-                        onClick = {
-                            if (!increment(ingredient)) {
-                                Toast.makeText(
-                                    context,
-                                    "Syrup count cannot exceed ${Drink.MAX_PUMP_COUNT}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
+                    IconButton(onClick = {
+                        if (!increment(ingredient)) {
+                            Toast.makeText(
+                                context, "Syrup count cannot exceed ${Drink.MAX_PUMP_COUNT}", Toast.LENGTH_SHORT
+                            ).show()
                         }
-                    ) {
+                    }) {
                         Text(text = "+", fontSize = 18.sp, color = Color.Green)
                     }
                 }
@@ -329,12 +368,10 @@ fun IceQuantitySlider(drink: Drink, setIce: (Int) -> Unit) {
 
         // Slider
         Slider(
-            value = sliderPosition.floatValue,
-            onValueChange = { newValue ->
+            value = sliderPosition.floatValue, onValueChange = { newValue ->
                 sliderPosition.floatValue = newValue
                 setIce(newValue.toInt())
-            },
-            valueRange = 0f..5f // Range of the slider
+            }, valueRange = 0f..5f // Range of the slider
         )
     }
 }
@@ -348,12 +385,9 @@ fun DropdownMenuDrinkBases(newDrink: Drink, selectBase: (Int) -> Unit) {
     val drinkBases = context.resources.getStringArray(R.array.drink_bases)
 
     ExposedDropdownMenuBox(
-        expanded = isExpanded,
-        onExpandedChange = { isExpanded = !isExpanded },
-        modifier = Modifier.fillMaxWidth()
+        expanded = isExpanded, onExpandedChange = { isExpanded = !isExpanded }, modifier = Modifier.fillMaxWidth()
     ) {
-        TextField(
-            value = drinkBases[newDrink.baseDrink],
+        TextField(value = drinkBases[newDrink.baseDrink],
             onValueChange = {},
             readOnly = true,
             trailingIcon = {
@@ -365,20 +399,14 @@ fun DropdownMenuDrinkBases(newDrink: Drink, selectBase: (Int) -> Unit) {
                 .fillMaxWidth()
         )
 
-        ExposedDropdownMenu(
-            expanded = isExpanded,
-            onDismissRequest = { isExpanded = false }
-        ) {
+        ExposedDropdownMenu(expanded = isExpanded, onDismissRequest = { isExpanded = false }) {
             drinkBases.forEachIndexed { index, baseName ->
-                DropdownMenuItem(
-                    text = {
-                        Text(text = baseName)
-                    },
-                    onClick = {
-                        selectBase(index)
-                        isExpanded = false
-                    }
-                )
+                DropdownMenuItem(text = {
+                    Text(text = baseName)
+                }, onClick = {
+                    selectBase(index)
+                    isExpanded = false
+                })
             }
         }
     }
