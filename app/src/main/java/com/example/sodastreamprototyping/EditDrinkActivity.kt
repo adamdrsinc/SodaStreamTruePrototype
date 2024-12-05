@@ -34,7 +34,6 @@ import com.example.sodastreamprototyping.viewModel.EditDrinkViewModel
 @Composable
 fun EditDrinkPage(navController: NavController, drink: Drink) {
 
-    val context = LocalContext.current
     val scrollState = rememberScrollState()
     val editDrinkViewModel = hiltViewModel<EditDrinkViewModel, EditDrinkViewModel.Factory>(
         creationCallback = { factory -> factory.create(drink = drink.copy()) }

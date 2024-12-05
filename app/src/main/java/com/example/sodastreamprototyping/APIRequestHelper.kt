@@ -318,16 +318,19 @@ class ApiRequestHelper @Inject constructor(@ApplicationContext val context: Cont
 
         }
 
-        /*fun completeOrder(
+        fun completeOrder(
             context: Context,
             onSuccess: () -> Unit,
             onError: () -> Unit
         ){
             //Add the order id to the endpoint
-            var urlBase = "/orders/here/"
+            var urlBase = "${BASE_URL}/orders/here/"
+            var orderID = ""
+
+            val url = urlBase + orderID
 
             val jsonObjectRequest = object : JsonObjectRequest(
-                Request.Method.POST, url, jsonParams,
+                Request.Method.POST, url, null,
                 {
                     response ->
                     onSuccess()
@@ -345,7 +348,7 @@ class ApiRequestHelper @Inject constructor(@ApplicationContext val context: Cont
                     return headers
                 }
             }
-        }*/
+        }
 
 
         // You can add other API methods below as needed, following the same pattern.
