@@ -22,5 +22,10 @@ class Basket {
         fun getDrinks(): ArrayList<Drink>{
             return basketDrinks
         }
+
+        fun clearBasket() {
+            basketDrinks.clear()
+            lastDrinkID = 0 // Reset the ID counter if needed
+        }
     }
 }

@@ -148,7 +148,7 @@ private fun onPaymentSheetResult(
         is PaymentSheetResult.Completed -> {
             Toast.makeText(context, "Payment Successful", Toast.LENGTH_LONG).show()
             Log.i("PaymentSuccess", "Payment completed successfully.")
-            //Basket.basketDrinks.clear()
+            Basket.clearBasket()
         }
         is PaymentSheetResult.Canceled -> {
             Toast.makeText(context, "Payment Canceled", Toast.LENGTH_LONG).show()
