@@ -33,7 +33,7 @@ fun MyDrinksPage(navController: NavController, onCreateDrink: (Drink) -> Unit) {
     val drinkIngredients = context.resources.getStringArray(R.array.drink_flavors)
 
     // TODO: these lines are test data, delete them when correct implementation is done
-    /*
+
     var ingList1 : List<Pair<Int, Int>> = listOf(
         Pair(0, 1),
         Pair(1, 1)
@@ -58,9 +58,6 @@ fun MyDrinksPage(navController: NavController, onCreateDrink: (Drink) -> Unit) {
         testDrink2,
         testDrink3
     )
-
-    val drinks = testDrinks
-    */
 
     // TODO: get saved drinks from server and store them in drinks
 
@@ -87,8 +84,8 @@ fun MyDrinksPage(navController: NavController, onCreateDrink: (Drink) -> Unit) {
                 .fillMaxWidth()
                 .padding(bottom = 56.dp) // Add padding to avoid overlap with the button
         ) {
-            drinks.forEach { drink ->
-                DrinkCard(drink)
+            testDrinks.forEach { drink -> //TODO: replace testDrinks with drinks when done testing
+                DrinkCard(drink, true)
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }

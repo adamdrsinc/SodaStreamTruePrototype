@@ -4,6 +4,9 @@ import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -51,7 +54,7 @@ fun MenuPage() {
 
     Column {
         drinks.forEach { drink ->
-            DrinkCard(drink)
+            DrinkCard(drink, false)
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
@@ -61,7 +64,7 @@ fun MenuPage() {
 //data class Drink(val name: String, val price: String, val description: String)
 
 @Composable
-fun DrinkCard(drink: Drink) {
+fun DrinkCard(drink: Drink, rating: Boolean) {
     val context = LocalContext.current
     Card(
         shape = RoundedCornerShape(8.dp),
@@ -100,6 +103,38 @@ fun DrinkCard(drink: Drink) {
                     Text(text = drink.description!!, fontSize = 14.sp)
                 }
             }
+
+            if (rating) {
+                StarRating()
+            }
+        }
+    }
+}
+
+@Composable
+fun StarRating(
+    modifier: Modifier = Modifier,
+    totalStars: Int = 5
+) {
+    var rating by remember { mutableStateOf(0) }
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = modifier
+    ) {
+        repeat(totalStars) { index ->
+            val starModifier = Modifier
+                .size(24.dp)
+                .clickable {
+                    rating = index + 1
+                }
+
+            Icon(
+                imageVector = if (index < rating) Icons.Filled.Star else Icons.Outlined.Star,
+                contentDescription = "Star",
+                tint = Color.Yellow,
+                modifier = starModifier
+            )
         }
     }
 }
