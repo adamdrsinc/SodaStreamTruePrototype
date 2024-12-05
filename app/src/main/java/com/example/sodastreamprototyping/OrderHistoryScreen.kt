@@ -81,95 +81,6 @@ fun ClosedOrdersSection(orders: List<Order>) {
 }
 
 @Composable
-fun OrderCard(order: Order, buttonText: String? = null) {
-    var isClicked by remember { mutableStateOf(false) }
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(all = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(order.description, style = MaterialTheme.typography.bodyLarge)
-            Spacer(modifier = Modifier.weight(1f))
-            if (buttonText != null) {
-                Button(
-                    onClick = {
-                        isClicked = true
-                              },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isClicked) Color.Green else MaterialTheme.colorScheme.primary,
-                        contentColor = if (isClicked) Color.White else MaterialTheme.colorScheme.onPrimary
-                    ),
-                    modifier = Modifier.padding(start = 16.dp)
-                ) {
-                    Text(if (isClicked) "✔" else buttonText)
-                }
-            }
-        }
-    }
-}
-
-/*@Composable
-fun AccordionOrderHistory(
-    title: String,
-    items: List<Drink>
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .clickable { expanded = !expanded }
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        ) {
-            Text(
-                text = title,
-                fontSize = 20.sp,
-                modifier = Modifier.weight(1f)
-            )
-            Icon(
-                imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                contentDescription = if (expanded) "Collapse" else "Expand"
-            )
-        }
-
-        AnimatedVisibility(
-            visible = expanded,
-            enter = expandVertically(),
-            exit = shrinkVertically()
-        ) {
-            if (!items.isEmpty()) {
-                Column {
-                    items.forEachIndexed { index, item ->
-                        DrinkCard(item)
-                    }
-                }
-            } else {
-                Column {
-                    Text(
-                        text = "Ingredients could not be retrieved. Refresh the app.",
-                        textAlign = TextAlign.Center
-                    )
-                }
-
-            }
-        }
-    }
-}*/
-
-@Composable
 fun AccordionOrderHistory(
     title: String,
     items: List<Drink>,
@@ -184,33 +95,35 @@ fun AccordionOrderHistory(
             .padding(8.dp)
             .clickable { expanded = !expanded }
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
+
+        Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp)
+                .padding(vertical = 8.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
-            Text(
-                text = title,
-                fontSize = 20.sp,
-                modifier = Modifier.weight(1f)
-            )
-            if(imHereButton)
-            {
-                Button(
-                    onClick = {
-                        isClicked = true
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isClicked) Color.Green else MaterialTheme.colorScheme.primary,
-                        contentColor = if (isClicked) Color.White else MaterialTheme.colorScheme.onPrimary
-                    ),
-                    modifier = Modifier.padding(start = 16.dp)
-                ) {
-                    Text(if (isClicked) "✔" else "I'm Here")
+            Row(
+                modifier = Modifier.padding(all = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(title, style = MaterialTheme.typography.bodyLarge)
+                Spacer(modifier = Modifier.weight(1f))
+                if (imHereButton) {
+                    Button(
+                        onClick = {
+                            isClicked = true
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isClicked) Color.Green else MaterialTheme.colorScheme.primary,
+                            contentColor = if (isClicked) Color.White else MaterialTheme.colorScheme.onPrimary
+                        ),
+                        modifier = Modifier.padding(start = 16.dp)
+                    ) {
+                        Text(if (isClicked) "✔" else "I'm Here")
+                    }
                 }
             }
-
         }
 
         AnimatedVisibility(
