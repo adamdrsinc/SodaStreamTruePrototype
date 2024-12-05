@@ -1,5 +1,6 @@
 package com.example.sodastreamprototyping
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -8,14 +9,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import kotlin.time.Duration
 
 @Composable
 fun SettingsScreen(navController: NavController) {
     var notificationsEnabled by remember { mutableStateOf(true) }
     var darkModeEnabled by remember { mutableStateOf(false) }
     var locationAccessEnabled by remember { mutableStateOf(true) }
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -83,7 +87,8 @@ fun SettingsScreen(navController: NavController) {
                     )
                     Switch(
                         checked = darkModeEnabled,
-                        onCheckedChange = { darkModeEnabled = it }
+                        onCheckedChange = { darkModeEnabled = it
+                        Toast.makeText(context, "You must pay for the battle pass to get dark theme", Toast.LENGTH_LONG).show()}
                     )
                 }
 
