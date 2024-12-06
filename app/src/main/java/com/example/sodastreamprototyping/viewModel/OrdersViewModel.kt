@@ -10,7 +10,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class OrdersViewModel @Inject constructor(val api: ApiRequestHelper) : ViewModel() {
-    private val _orders = MutableStateFlow<Array<Pair<Int, Boolean>>?>(null)
+    private val _orders = MutableStateFlow<List<Pair<Int, Boolean>>?>(null)
     val orders = _orders.asStateFlow()
 
     val orderNotified = mutableStateOf(false)

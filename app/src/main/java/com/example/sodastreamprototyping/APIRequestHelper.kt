@@ -93,7 +93,7 @@ class ApiRequestHelper @Inject constructor(@ApplicationContext val context: Cont
     }
 
     fun getOrderHistory(
-        onSuccess: (Array<Pair<Int, Boolean>>) -> Unit,
+        onSuccess: (List<Pair<Int, Boolean>>) -> Unit,
         onError: () -> Unit
     ) {
         val url = "${BASE_URL}/orders/history"
@@ -101,9 +101,15 @@ class ApiRequestHelper @Inject constructor(@ApplicationContext val context: Cont
         val jsonObjectRequest = object : JsonArrayRequest(
             Request.Method.GET, url, null,
             { response ->
+                val openOrders = mutableListOf<Pair<Int, Boolean>>()
+                for(i in 0 until response.length()){
+                    openOrders.add(Pair(
+                        response.getJSONObject(i).getString("id").toInt(),
+                        response.getJSONObject(i).getString("completed").toBoolean()))
+                }
                 //TODO parse request, get list of Pair<Int, Boolean>
                 val mock = arrayOf(Pair(1, false))
-                onSuccess(mock)
+                onSuccess(openOrders.toList())
             },
             { error ->
                 Log.e("API_ERROR", error.toString())
