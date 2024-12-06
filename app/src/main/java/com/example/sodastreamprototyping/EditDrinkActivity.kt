@@ -81,11 +81,7 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
             // Accordion for ingredients
             SectionTitle("Ingredients")
             AccordionSectionIngredientRow(title = "Ingredients",
-                items = if(flavors.isEmpty()){
-                    context.resources.getStringArray(R.array.drink_flavors).toList()
-                } else {
-                    flavors
-                },
+                items = flavors,
                 suggestions,
                 newDrink.getAllIngredientQuantity(flavors.size),
                 { editDrinkViewModel.addIngredient(it) },
