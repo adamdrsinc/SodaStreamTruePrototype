@@ -15,6 +15,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.toString
 
 @Singleton
 class ApiRequestHelper @Inject constructor(@ApplicationContext val context: Context) {
@@ -243,7 +244,7 @@ class ApiRequestHelper @Inject constructor(@ApplicationContext val context: Cont
         fun createOrder(
             context: Context,
             drinkList: List<Drink>,
-            onSuccess: () -> Unit,
+            onSuccess: (String) -> Unit,
             onError: (String) -> Unit
         ) {
             val url = "$BASE_URL/orders/create"
@@ -268,19 +269,30 @@ class ApiRequestHelper @Inject constructor(@ApplicationContext val context: Cont
                 }
             }
 
-            val jsonObjectRequest = object : JsonArrayRequest(
-                Request.Method.POST, url, jsonParams,
+            val jsonObjectRequest = object : JsonObjectRequest(
+                Request.Method.POST, url, null,
                 { response ->
-                    onSuccess()
+                    try {
+                        val clientSecret = response.getString("clientSecret")
+                        onSuccess(clientSecret)
+                    } catch (e: Exception) {
+                        Log.e("API_ERROR", e.toString())
+                        onError("Failed to parse client secret")
+                    }
                 },
                 { error ->
                     Log.e("API_ERROR", error.toString())
                     onError(error.message ?: "An error occurred while creating the order")
                 }
             ) {
+                override fun getBody(): ByteArray {
+                    return jsonParams.toString().toByteArray(Charsets.UTF_8)
+                }
+
                 override fun getHeaders(): MutableMap<String, String> {
                     val headers = HashMap<String, String>()
                     headers["Authorization"] = "Bearer $accessToken"
+                    headers["Content-Type"] = "application/json"
                     return headers
                 }
             }

@@ -33,7 +33,7 @@ import com.example.sodastreamprototyping.viewModel.EditDrinkViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditDrinkPage(navController: NavController, drink: Drink) {
-
+    val context = LocalContext.current
     val scrollState = rememberScrollState()
     val editDrinkViewModel =
         hiltViewModel<EditDrinkViewModel, EditDrinkViewModel.Factory>(creationCallback = { factory ->
@@ -75,13 +75,17 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
 
             //Drink Bases Dropdown
             SectionTitle("Bases")
-            DropdownMenuDrinkBases(newDrink) { editDrinkViewModel.setBase(it) }
+            DropdownMenuDrinkBases(newDrink, bases) { editDrinkViewModel.setBase(it) }
             Spacer(modifier = Modifier.height(18.dp))
 
             // Accordion for ingredients
             SectionTitle("Ingredients")
             AccordionSectionIngredientRow(title = "Ingredients",
-                items = flavors,
+                items = if(flavors.isEmpty()){
+                    context.resources.getStringArray(R.array.drink_flavors).toList()
+                } else {
+                    flavors
+                },
                 suggestions,
                 newDrink.getAllIngredientQuantity(flavors.size),
                 { editDrinkViewModel.addIngredient(it) },
@@ -374,11 +378,16 @@ fun IceQuantitySlider(drink: Drink, setIce: (Int) -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DropdownMenuDrinkBases(newDrink: Drink, selectBase: (Int) -> Unit) {
+fun DropdownMenuDrinkBases(newDrink: Drink, bases: List<String>, selectBase: (Int) -> Unit) {
     val context = LocalContext.current
-
     var isExpanded by remember { mutableStateOf(false) }
-    val drinkBases = context.resources.getStringArray(R.array.drink_bases)
+    //val drinkBases = context.resources.getStringArray(R.array.drink_bases)
+
+    val drinkBases = if(bases.isEmpty()) {
+        context.resources.getStringArray(R.array.drink_bases).toList()
+    } else {
+        bases
+    }
 
     ExposedDropdownMenuBox(
         expanded = isExpanded, onExpandedChange = { isExpanded = !isExpanded }, modifier = Modifier.fillMaxWidth()

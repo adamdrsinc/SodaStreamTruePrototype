@@ -92,6 +92,34 @@ fun ShoppingBasket(
             isLoading = isLoading,
             onCheckoutClick = {
                 isLoading = true
+
+                ApiRequestHelper.createOrder(context, Basket.basketDrinks,
+                    onSuccess = { clientSecret ->
+
+                        ApiRequestHelper.fetchPaymentIntent(
+                            context = context,
+                            amount = totalAmount,
+                            currency = "usd",
+                            onSuccess = { clientSecret ->
+                                paymentIntentClientSecret = clientSecret
+                                isLoading = false
+                                presentPaymentSheet(paymentSheetLauncher, clientSecret)
+                            },
+                            onError = { errorMessage ->
+                                isLoading = false
+                                Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
+                            }
+                        )
+
+                        Toast.makeText(context, "Order Created", Toast.LENGTH_SHORT).show()
+                    },
+                    onError = {
+                        Toast.makeText(context, "Order Failed", Toast.LENGTH_SHORT).show()
+                    }
+
+                )
+
+                /*
                 ApiRequestHelper.fetchPaymentIntent(
                     context = context,
                     amount = totalAmount,
@@ -105,7 +133,7 @@ fun ShoppingBasket(
                         isLoading = false
                         Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
                     }
-                )
+                )*/
             }
         )
     }
@@ -149,15 +177,6 @@ private fun onPaymentSheetResult(
         is PaymentSheetResult.Completed -> {
             Toast.makeText(context, "Payment Successful", Toast.LENGTH_LONG).show()
             Log.i("PaymentSuccess", "Payment completed successfully.")
-            ApiRequestHelper.createOrder(context, Basket.basketDrinks,
-                onSuccess = {
-                    Toast.makeText(context, "ORDER CREATED", Toast.LENGTH_SHORT).show()
-                },
-                onError = {
-                    Toast.makeText(context, "ORDER FAILED", Toast.LENGTH_SHORT).show()
-                }
-
-            )
 
             Basket.clearBasket()
             navController.navigate(Screen.OrderHistory.route)
