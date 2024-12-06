@@ -150,6 +150,7 @@ private fun onPaymentSheetResult(
             Toast.makeText(context, "Payment Successful", Toast.LENGTH_LONG).show()
             Log.i("PaymentSuccess", "Payment completed successfully.")
             Basket.clearBasket()
+            Basket.addOrder()
             navController.navigate(Screen.OrderHistory.route)
         }
         is PaymentSheetResult.Canceled -> {

@@ -4,6 +4,8 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,7 +23,7 @@ data class Order(
 )
 
 @Composable
-fun OrderHistoryScreen(onNotified: () -> Unit) {
+fun OrderHistoryScreen(navController: NavController, onNotified: () -> Unit) {
     val viewModel : OrdersViewModel = hiltViewModel()
     val orders by viewModel.orders.collectAsState()
     val orderNotified = viewModel.orderNotified
@@ -29,10 +31,23 @@ fun OrderHistoryScreen(onNotified: () -> Unit) {
     LaunchedEffect(orderNotified.value) {
         if(orderNotified.value){
             onNotified()
+            viewModel.orderNotified.value = false
         }
     }
 
     Column(modifier = Modifier.padding(16.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Start
+        ) {
+            Button(onClick = { navController.navigate("home") }) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowBack,
+                    contentDescription = "Back"
+                )
+            }
+        }
+
         Text("Open Orders", style = MaterialTheme.typography.titleLarge)
         orders?.forEach { order ->
             if(!order.second) {
@@ -71,5 +86,5 @@ fun OrderCard(id: Int, buttonText: String? = null, onClick: () -> Unit = {}) {
 @Composable
 fun OrderHistoryScreenDemo(navController: NavController) {
     val context = LocalContext.current
-    OrderHistoryScreen{Toast.makeText(context, "Order available for pickup", Toast.LENGTH_LONG).show()}
+    OrderHistoryScreen(navController){Toast.makeText(context, "Order available for pickup", Toast.LENGTH_LONG).show()}
 }
