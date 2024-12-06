@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SodaStreamPrototyping</string>
+    <string name="app_name">SodaSensAItions</string>
     <string name="title_activity_basket">BasketActivity</string>
     <string name="title_activity_edit_drink">EditDrinkActivity</string>
     <string name="title_activity_checkout">CheckoutActivity</string>
