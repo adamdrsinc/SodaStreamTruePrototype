@@ -1,6 +1,7 @@
 package com.example.sodastreamprototyping
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -10,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -50,8 +52,8 @@ fun OrderHistoryScreen(navController: NavController, onNotified: () -> Unit) {
 
         Text("Open Orders", style = MaterialTheme.typography.titleLarge)
         orders?.forEach { order ->
-            if(!order.second) {
-                OrderCard(order.first, buttonText = "I'm Here", onClick = {
+            if(true) {
+                OrderCard(order.first, order.second, buttonText = "I'm Here", onClick = {
                     viewModel.amHere(order.first)
                 })
             }
@@ -60,7 +62,7 @@ fun OrderHistoryScreen(navController: NavController, onNotified: () -> Unit) {
 }
 
 @Composable
-fun OrderCard(id: Int, buttonText: String? = null, onClick: () -> Unit = {}) {
+fun OrderCard(id: Int, complete: Boolean, buttonText: String? = null, onClick: () -> Unit = {}) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -73,10 +75,13 @@ fun OrderCard(id: Int, buttonText: String? = null, onClick: () -> Unit = {}) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text("Order # $id", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-            if (buttonText != null) {
+            if (!complete) {
                 Button(onClick = onClick) {
-                    Text(buttonText)
+                    Text("I'm here")
                 }
+            }
+            else{
+                Text("order ready for pickup")
             }
         }
     }
