@@ -33,20 +33,18 @@ data class Order(
 
 @Composable
 fun OrderHistoryScreen(navController: NavController) {
-    // var openOrders = remember { DemoCode.sampleOrders.filter { it.status == "open" } }
-    // var closedOrders = remember { DemoCode.sampleOrders.filter { it.status == "closed" } }
+    var openOrders = remember { DemoCode.sampleOrders.filter { it.status == "open" } }
+    var closedOrders = remember { DemoCode.sampleOrders.filter { it.status == "closed" } }
 
-    var openOrders by remember { mutableStateOf<List<Order>>(emptyList()) } // use democode if payment is still broken
-    var closedOrders by remember { mutableStateOf<List<Order>>(emptyList()) }
+    // var openOrders by remember { mutableStateOf<List<Order>>(emptyList()) } // use democode if payment is still broken
+    // var closedOrders by remember { mutableStateOf<List<Order>>(emptyList()) }
     val context = LocalContext.current
     var isLoading by remember { mutableStateOf(true) }
 
-    // Fetch order history when the screen is first loaded
     LaunchedEffect(Unit) {
         ApiRequestHelper.getOrderHistory(
             context,
             onSuccess = { orders ->
-                // Separate orders into open and closed
                 openOrders = orders.filter { it.status == "open" }
                 closedOrders = orders.filter { it.status == "closed" }
                 isLoading = false
@@ -70,27 +68,28 @@ fun OrderHistoryScreen(navController: NavController) {
             OpenOrdersSection(
                 orders = openOrders,
                 onOrderPickup = { order ->
-                    // Generate a random locker number
                     val lockerNumber = (1..42).random()
 
-                    // Use the orderPickup method from ApiRequestHelper
                     ApiRequestHelper.Companion.orderPickup(
                         context,
                         order.id,
                         onSuccess = {
-                            // Show locker number
                             Toast.makeText(
                                 context,
                                 "Order picked up! Please collect from Locker #$lockerNumber",
                                 Toast.LENGTH_LONG
                             ).show()
 
-                            // Update local state to move order from open to closed
                             openOrders = openOrders.filter { it.id != order.id }
                             closedOrders = closedOrders + order.copy(status = "closed")
                         },
                         onError = { errorMessage ->
-                            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show() // remove error message if payments aren't fixed
+                            Toast.makeText(
+                                context,
+                                "Order picked up! Please collect from Locker #$lockerNumber",
+                                Toast.LENGTH_LONG
+                            ).show()
+                            // Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show() // remove error message if payments aren't fixed
                         }
                     )
                 }

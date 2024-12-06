@@ -434,14 +434,12 @@ class ApiRequestHelper @Inject constructor(@ApplicationContext val context: Cont
                 { error ->
                     Log.e("API_ERROR", "Order history error: ${error.toString()}")
                     if (error.networkResponse?.statusCode == 401) {
-                        // Access token might be expired, try refreshing
                         val refreshToken = UserPreferences.getRefreshToken(context)
                         if (refreshToken != null) {
                             refreshAccessToken(
                                 context,
                                 refreshToken,
                                 onSuccess = {
-                                    // Retry the request after refreshing token
                                     getOrderHistory(context, onSuccess, onError)
                                 },
                                 onError = { refreshError ->
@@ -473,19 +471,15 @@ class ApiRequestHelper @Inject constructor(@ApplicationContext val context: Cont
             for (i in 0 until jsonArray.length()) {
                 val orderJson = jsonArray.getJSONObject(i)
 
-                // Parse order details
                 val orderId = orderJson.getInt("id")
                 val isCompleted = orderJson.getBoolean("completed")
                 val createdAt = orderJson.getString("createdAt")
 
-                // Create description by parsing drinks
                 val drinksArray = orderJson.getJSONArray("drinks")
                 val description = createOrderDescription(drinksArray)
 
-                // Determine status
                 val status = if (isCompleted) "closed" else "open"
 
-                // Create Order object
                 val order = Order(
                     id = orderId,
                     description = description,
