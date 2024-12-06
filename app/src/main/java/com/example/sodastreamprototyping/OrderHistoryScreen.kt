@@ -1,5 +1,6 @@
 package com.example.sodastreamprototyping
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
@@ -32,8 +33,30 @@ data class Order(
 
 @Composable
 fun OrderHistoryScreen(navController: NavController) {
-    val openOrders = remember { DemoCode.sampleOrders.filter { it.status == "open" } }
-    val closedOrders = remember { DemoCode.sampleOrders.filter { it.status == "closed" } }
+    // var openOrders = remember { DemoCode.sampleOrders.filter { it.status == "open" } }
+    // var closedOrders = remember { DemoCode.sampleOrders.filter { it.status == "closed" } }
+
+    var openOrders by remember { mutableStateOf<List<Order>>(emptyList()) } // use democode if payment is still broken
+    var closedOrders by remember { mutableStateOf<List<Order>>(emptyList()) }
+    val context = LocalContext.current
+    var isLoading by remember { mutableStateOf(true) }
+
+    // Fetch order history when the screen is first loaded
+    LaunchedEffect(Unit) {
+        ApiRequestHelper.getOrderHistory(
+            context,
+            onSuccess = { orders ->
+                // Separate orders into open and closed
+                openOrders = orders.filter { it.status == "open" }
+                closedOrders = orders.filter { it.status == "closed" }
+                isLoading = false
+            },
+            onError = { errorMessage ->
+                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                isLoading = false
+            }
+        )
+    }
 
     MainLayout(navController = navController){
         innerPadding ->
@@ -44,7 +67,34 @@ fun OrderHistoryScreen(navController: NavController) {
                 .padding(innerPadding)
                 .fillMaxSize()
         ) {
-            OpenOrdersSection(openOrders)
+            OpenOrdersSection(
+                orders = openOrders,
+                onOrderPickup = { order ->
+                    // Generate a random locker number
+                    val lockerNumber = (1..42).random()
+
+                    // Use the orderPickup method from ApiRequestHelper
+                    ApiRequestHelper.Companion.orderPickup(
+                        context,
+                        order.id,
+                        onSuccess = {
+                            // Show locker number
+                            Toast.makeText(
+                                context,
+                                "Order picked up! Please collect from Locker #$lockerNumber",
+                                Toast.LENGTH_LONG
+                            ).show()
+
+                            // Update local state to move order from open to closed
+                            openOrders = openOrders.filter { it.id != order.id }
+                            closedOrders = closedOrders + order.copy(status = "closed")
+                        },
+                        onError = { errorMessage ->
+                            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show() // remove error message if payments aren't fixed
+                        }
+                    )
+                }
+            )
             ClosedOrdersSection(closedOrders)
         }
     }
@@ -52,13 +102,15 @@ fun OrderHistoryScreen(navController: NavController) {
 }
 
 @Composable
-fun OpenOrdersSection(orders: List<Order>) {
+fun OpenOrdersSection(orders: List<Order>, onOrderPickup: (Order) -> Unit) {
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Open Orders", style = MaterialTheme.typography.titleLarge)
         orders.forEach { order ->
             AccordionOrderHistory(
                 title = order.description,
                 items = DemoCode.drinksDemoList, // Replace with actual list of drinks if available
+                imHereButton = true,
+                onImHereClick = { onOrderPickup(order) }
             )
         }
     }
@@ -84,7 +136,8 @@ fun ClosedOrdersSection(orders: List<Order>) {
 fun AccordionOrderHistory(
     title: String,
     items: List<Drink>,
-    imHereButton: Boolean = true
+    imHereButton: Boolean = true,
+    onImHereClick: () -> Unit = {}
 ) {
     var expanded by remember { mutableStateOf(false) }
     var isClicked by remember { mutableStateOf(false) }
@@ -111,16 +164,14 @@ fun AccordionOrderHistory(
                 Spacer(modifier = Modifier.weight(1f))
                 if (imHereButton) {
                     Button(
-                        onClick = {
-                            isClicked = true
-                        },
+                        onClick = onImHereClick,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isClicked) Color.Green else MaterialTheme.colorScheme.primary,
-                            contentColor = if (isClicked) Color.White else MaterialTheme.colorScheme.onPrimary
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
                         ),
                         modifier = Modifier.padding(start = 16.dp)
                     ) {
-                        Text(if (isClicked) "✔" else "I'm Here")
+                        Text("I'm Here")
                     }
                 }
             }

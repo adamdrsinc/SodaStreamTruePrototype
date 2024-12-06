@@ -8,6 +8,7 @@ import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.example.sodastreamprototyping.Drink
+import com.example.sodastreamprototyping.Order
 import com.example.sodastreamprototyping.Repository
 import com.example.sodastreamprototyping.UserPreferences
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -362,6 +363,148 @@ class ApiRequestHelper @Inject constructor(@ApplicationContext val context: Cont
             }
         }
 
+        // function to notify that user is here
+        fun orderPickup(
+            context: Context,
+            orderId: Int,
+            onSuccess: () -> Unit,
+            onError: (String) -> Unit
+        ) {
+            val url = "$BASE_URL/orders/here/$orderId"
+            val accessToken = UserPreferences.getAccessToken(context)
+
+            val jsonObjectRequest = object : JsonObjectRequest(
+                Request.Method.POST, url, null,
+                {
+                    onSuccess()
+                },
+                { error ->
+                    Log.e("API_ERROR", error.toString())
+                    if (error.networkResponse?.statusCode == 401) {
+                        val refreshToken = UserPreferences.getRefreshToken(context)
+                        if (refreshToken != null) {
+                            refreshAccessToken(
+                                context,
+                                refreshToken,
+                                onSuccess = {
+                                    orderPickup(context, orderId, onSuccess, onError)
+                                },
+                                onError = { refreshError ->
+                                    onError(refreshError)
+                                }
+                            )
+                        } else {
+                            onError("Authentication failed. Please log in again.")
+                        }
+                    } else {
+                        onError(error.message ?: "An error occurred while picking up order")
+                    }
+                }
+            ) {
+                override fun getHeaders(): MutableMap<String, String> {
+                    val headers = HashMap<String, String>()
+                    headers["Authorization"] = "Bearer $accessToken"
+                    return headers
+                }
+            }
+
+            val requestQueue: RequestQueue = Volley.newRequestQueue(context)
+            requestQueue.add(jsonObjectRequest)
+        }
+
+        fun getOrderHistory(
+            context: Context,
+            onSuccess: (List<Order>) -> Unit,
+            onError: (String) -> Unit
+        ) {
+            val url = "${BASE_URL}/orders/history"
+            val accessToken = UserPreferences.getAccessToken(context)
+
+            val jsonArrayRequest = object : JsonArrayRequest(
+                Request.Method.GET, url, null,
+                { response ->
+                    try {
+                        val orders = parseOrderHistory(response)
+                        onSuccess(orders)
+                    } catch (e: Exception) {
+                        Log.e("API_ERROR", "Error parsing order history: ${e.message}")
+                        onError("Failed to parse order history")
+                    }
+                },
+                { error ->
+                    Log.e("API_ERROR", "Order history error: ${error.toString()}")
+                    if (error.networkResponse?.statusCode == 401) {
+                        // Access token might be expired, try refreshing
+                        val refreshToken = UserPreferences.getRefreshToken(context)
+                        if (refreshToken != null) {
+                            refreshAccessToken(
+                                context,
+                                refreshToken,
+                                onSuccess = {
+                                    // Retry the request after refreshing token
+                                    getOrderHistory(context, onSuccess, onError)
+                                },
+                                onError = { refreshError ->
+                                    onError(refreshError)
+                                }
+                            )
+                        } else {
+                            onError("Authentication failed. Please log in again.")
+                        }
+                    } else {
+                        onError(error.message ?: "An error occurred while fetching order history")
+                    }
+                }
+            ) {
+                override fun getHeaders(): MutableMap<String, String> {
+                    val headers = HashMap<String, String>()
+                    headers["Authorization"] = "Bearer $accessToken"
+                    return headers
+                }
+            }
+
+            val requestQueue: RequestQueue = Volley.newRequestQueue(context)
+            requestQueue.add(jsonArrayRequest)
+        }
+
+        private fun parseOrderHistory(jsonArray: JSONArray): List<Order> {
+            val orders = mutableListOf<Order>()
+
+            for (i in 0 until jsonArray.length()) {
+                val orderJson = jsonArray.getJSONObject(i)
+
+                // Parse order details
+                val orderId = orderJson.getInt("id")
+                val isCompleted = orderJson.getBoolean("completed")
+                val createdAt = orderJson.getString("createdAt")
+
+                // Create description by parsing drinks
+                val drinksArray = orderJson.getJSONArray("drinks")
+                val description = createOrderDescription(drinksArray)
+
+                // Determine status
+                val status = if (isCompleted) "closed" else "open"
+
+                // Create Order object
+                val order = Order(
+                    id = orderId,
+                    description = description,
+                    status = status
+                )
+
+                orders.add(order)
+            }
+
+            return orders
+        }
+
+        private fun createOrderDescription(drinksArray: JSONArray): String {
+            return when (drinksArray.length()) {
+                0 -> "Empty Order"
+                1 -> "1 Drink Order"
+                else -> "${drinksArray.length()} Drink Order"
+            }
+        }
 
         // You can add other API methods below as needed, following the same pattern.
     }
