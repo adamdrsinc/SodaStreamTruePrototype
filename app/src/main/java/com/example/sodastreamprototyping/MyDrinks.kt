@@ -23,34 +23,6 @@ import androidx.navigation.NavController
 @Composable
 fun MyDrinksPage(navController: NavController, onCreateDrink: (Drink) -> Unit) {
     val scrollState = rememberScrollState()
-    val context = LocalContext.current
-    val drinkBases = context.resources.getStringArray(R.array.drink_bases)
-    val drinkIngredients = context.resources.getStringArray(R.array.drink_flavors)
-
-    var ingList1 : List<Pair<Int, Int>> = listOf(
-        Pair(0, 1),
-        Pair(1, 1)
-    )
-    var ingList2 : List<Pair<Int, Int>> = listOf(
-        Pair(2, 1),
-        Pair(3, 1)
-    )
-    var ingList3 : List<Pair<Int, Int>> = listOf(
-        Pair(4, 1),
-        Pair(5, 1)
-    )
-
-    var drink1 = Drink(ingList1.toMutableList(), name = "Custom Drink 1", quantity = 1, isCustom = true, baseDrink = 0)
-    var drink2 = Drink(ingList2.toMutableList(),
-        name = "Custom Drink 2", quantity = 1, isCustom = true, iceQuantity = 5, baseDrink = 1)
-    var drink3 = Drink(ingList3.toMutableList(),
-        name = "Custom Drink 3", quantity = 1, isCustom = true, iceQuantity = 3, baseDrink = 2)
-
-    val drinks = listOf(
-        drink1,
-        drink2,
-        drink3
-    )
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -60,7 +32,7 @@ fun MyDrinksPage(navController: NavController, onCreateDrink: (Drink) -> Unit) {
                 .fillMaxWidth()
                 .padding(bottom = 56.dp) // Add padding to avoid overlap with the button
         ) {
-            drinks.forEach { drink ->
+            DemoCode.drinksDemoList.forEach { drink ->
                 DrinkCard(drink)
                 Spacer(modifier = Modifier.height(16.dp))
             }

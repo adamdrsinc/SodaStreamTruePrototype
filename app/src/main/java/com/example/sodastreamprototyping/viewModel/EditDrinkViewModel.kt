@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sodastreamprototyping.Basket
 import com.example.sodastreamprototyping.Drink
+import com.example.sodastreamprototyping.Repository
 import com.example.sodastreamprototyping.TensorFlowAPI
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -17,6 +18,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel(assistedFactory = EditDrinkViewModel.Factory::class)
 class EditDrinkViewModel @AssistedInject constructor(
     private val ai: TensorFlowAPI,
+    private val repo: Repository,
     @Assisted startDrink: Drink,
 ) : ViewModel() {
 
@@ -29,6 +31,8 @@ class EditDrinkViewModel @AssistedInject constructor(
 
     val drink: StateFlow<Drink> = _drink.asStateFlow()
     val suggestion: StateFlow<List<Int>> = _suggestions.asStateFlow()
+    val bases = repo.basesFromDB.asStateFlow()
+    val flavors = repo.drinkFlavorsFromDB.asStateFlow()
 
     init {
         regenerateSuggestions()
@@ -72,4 +76,6 @@ class EditDrinkViewModel @AssistedInject constructor(
                 ai.generateDrink(_drink.value.baseDrink, _drink.value.getAllIngredientQuantity(ai.flavorSize))
         }
     }
+
+
 }

@@ -25,7 +25,6 @@ fun Home(navController: NavController, onDrinkEdit: (Drink) -> Unit)
         factory = HomeViewModel.Factory(context)
     )
 
-
     val selectedTabIndex by homeViewModel.selectedTabIndex.collectAsState(initial = 0)
     val tabs = listOf("Menu", "My Drinks", "Generate Drinks")
 

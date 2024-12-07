@@ -79,9 +79,8 @@ data class Drink(
     fun getPrice(): Double{
         var price = BASE_PRICE
 
-        val ingredientCount = ingredients.size
-        if(ingredientCount > FREE_PUMP_COUNT){
-            price += INGREDIENT_COST * (ingredientCount - FREE_PUMP_COUNT)
+        if(currentPumpCount > FREE_PUMP_COUNT){
+            price += INGREDIENT_COST * (currentPumpCount - FREE_PUMP_COUNT).toDouble()
         }
 
         return price

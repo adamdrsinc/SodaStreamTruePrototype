@@ -1,8 +1,7 @@
 package com.example.sodastreamprototyping
 
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -12,7 +11,7 @@ import com.example.sodastreamprototyping.viewModel.NavigationViewModel
 fun Navigation(startDestination: String)
 {
     val navController = rememberNavController()
-    val viewModel : NavigationViewModel = viewModel()
+    val viewModel : NavigationViewModel = hiltViewModel()
 
 
     fun navigateToEditDrink(drink: Drink) {
@@ -25,7 +24,7 @@ fun Navigation(startDestination: String)
         composable(route = Screen.SignIn.route) {
             SignInScreen(
                 onSignUpClick = { navController.navigate("sign_up") },
-                onSignInSuccess = { navController.navigate("home") },
+                onSignInSuccess = {navController.navigate("home")},
                 navController = navController
             )
         }
@@ -35,7 +34,9 @@ fun Navigation(startDestination: String)
             )
         }
         composable(route = Screen.Home.route) {
-            Home(navController = navController){navigateToEditDrink(it)}
+            Home(navController = navController){
+                navigateToEditDrink(it)
+            }
         }
 
         composable(route = Screen.Basket.route){

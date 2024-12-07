@@ -92,6 +92,34 @@ fun ShoppingBasket(
             isLoading = isLoading,
             onCheckoutClick = {
                 isLoading = true
+
+//                ApiRequestHelper.createOrder(context, Basket.basketDrinks,
+//                    onSuccess = { clientSecret ->
+//
+//                        ApiRequestHelper.fetchPaymentIntent(
+//                            context = context,
+//                            amount = totalAmount,
+//                            currency = "usd",
+//                            onSuccess = { clientSecret ->
+//                                paymentIntentClientSecret = clientSecret
+//                                isLoading = false
+//                                presentPaymentSheet(paymentSheetLauncher, clientSecret)
+//                            },
+//                            onError = { errorMessage ->
+//                                isLoading = false
+//                                Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
+//                            }
+//                        )
+//
+//                        Toast.makeText(context, "Order Created", Toast.LENGTH_SHORT).show()
+//                    },
+//                    onError = {
+//                        Toast.makeText(context, "Order Failed", Toast.LENGTH_SHORT).show()
+//                    }
+//
+//                )
+
+
                 ApiRequestHelper.fetchPaymentIntent(
                     context = context,
                     amount = totalAmount,
@@ -149,6 +177,7 @@ private fun onPaymentSheetResult(
         is PaymentSheetResult.Completed -> {
             Toast.makeText(context, "Payment Successful", Toast.LENGTH_LONG).show()
             Log.i("PaymentSuccess", "Payment completed successfully.")
+
             Basket.clearBasket()
             Basket.addOrder()
             navController.navigate(Screen.OrderHistory.route)

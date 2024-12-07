@@ -16,41 +16,10 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun MenuPage() {
-
     Spacer(modifier = Modifier.height(16.dp))
 
-    val context = LocalContext.current
-    val drinkBases = context.resources.getStringArray(R.array.drink_bases)
-    val drinkIngredients = context.resources.getStringArray(R.array.drink_flavors)
-
-    var ingList1 : MutableList<Pair<Int, Int>> = mutableListOf(
-        Pair(2, 1),
-        Pair(3, 1)
-    )
-    var ingList2 : MutableList<Pair<Int, Int>> = mutableListOf(
-        Pair(2, 1),
-        Pair(3, 1)
-    )
-    var ingList3 : MutableList<Pair<Int, Int>> = mutableListOf(
-        Pair(4, 1),
-        Pair(5, 1)
-    )
-
-    //toMutableList() must be called to get a deep copy of the list
-    var drink1 = Drink(ingList1, name = "Strawberry Creamer", quantity = 1, isCustom = false, baseDrink = 0)
-    var drink2 = Drink(ingList2, name = "Something Something",quantity = 1, isCustom = false, iceQuantity = 5,
-        baseDrink = 1)
-    var drink3 = Drink(ingList3, name = "Other Thing", quantity = 1, isCustom = false, iceQuantity = 3, baseDrink
-    = 2)
-
-    val drinks = listOf(
-        drink1,
-        drink2,
-        drink3
-    )
-
     Column {
-        drinks.forEach { drink ->
+        DemoCode.drinksDemoList.forEach { drink ->
             DrinkCard(drink)
             Spacer(modifier = Modifier.height(16.dp))
         }
