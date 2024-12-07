@@ -22,6 +22,7 @@ import org.mockito.kotlin.mock
 @OptIn(ExperimentalCoroutinesApi::class)
 class EditDrinkTest {
     lateinit var ai : TensorFlowAPI
+    lateinit var repo: Repository
 
     @Before
     fun setDispatcher(){
@@ -30,6 +31,7 @@ class EditDrinkTest {
 
     @Before
     fun initAI(){
+        repo = mock<Repository>()
         val mockResults = mapOf(
             listOf(0, 0) to listOf(0, 1),
             listOf(1, 0) to listOf(1),
@@ -62,7 +64,7 @@ class EditDrinkTest {
     @Test
     fun changeName(){
         val drink = Drink(emptyList<Pair<Int, Int>>().toMutableList(), "drink1")
-        val viewModel = EditDrinkViewModel(ai, drink)
+        val viewModel = EditDrinkViewModel(ai, repo, drink)
         viewModel.setName("drink2")
         assertEquals("drink2", viewModel.drink.value.name)
     }
@@ -70,7 +72,7 @@ class EditDrinkTest {
     @Test
     fun changeIce(){
         val drink = Drink(emptyList<Pair<Int, Int>>().toMutableList(), "drink1", iceQuantity = 1)
-        val viewModel = EditDrinkViewModel(ai, drink)
+        val viewModel = EditDrinkViewModel(ai, repo, drink)
         assertEquals(1, viewModel.drink.value.iceQuantity)
         viewModel.setIce(3)
         assertEquals(3, viewModel.drink.value.iceQuantity)
@@ -79,7 +81,7 @@ class EditDrinkTest {
     @Test
     fun changeBase(){
         val drink = Drink(emptyList<Pair<Int, Int>>().toMutableList(), "drink1", baseDrink = 1)
-        val viewModel = EditDrinkViewModel(ai, drink)
+        val viewModel = EditDrinkViewModel(ai, repo, drink)
         assertEquals(1, viewModel.drink.value.baseDrink)
         viewModel.setBase(2)
         assertEquals(2, viewModel.drink.value.baseDrink)
@@ -88,7 +90,7 @@ class EditDrinkTest {
     @Test
     fun incrementIngredient(){
         val drink = Drink(mutableListOf(Pair(0, 1)), "drink1")
-        val viewModel = EditDrinkViewModel(ai, drink)
+        val viewModel = EditDrinkViewModel(ai, repo, drink)
         assertEquals(1, viewModel.drink.value.ingredients[0].second)
         viewModel.addIngredient(0)
         assertEquals(2, viewModel.drink.value.ingredients[0].second)
@@ -99,7 +101,7 @@ class EditDrinkTest {
     @Test
     fun decrementIngredient(){
         val drink = Drink(mutableListOf(Pair(0, 1)), "drink1")
-        val viewModel = EditDrinkViewModel(ai, drink)
+        val viewModel = EditDrinkViewModel(ai, repo, drink)
         assertEquals(1, viewModel.drink.value.ingredients[0].second)
         viewModel.removeIngredient(0)
         assertEquals(0, viewModel.drink.value.ingredients.size)
@@ -108,7 +110,7 @@ class EditDrinkTest {
     @Test
     fun `gets ai suggestions`() = runTest{
         val drink = Drink(name="drink1")
-        val viewModel = EditDrinkViewModel(ai, drink)
+        val viewModel = EditDrinkViewModel(ai, repo, drink)
         advanceUntilIdle()
         assertEquals(listOf(0, 1), viewModel.suggestion.value)
     }
@@ -116,7 +118,7 @@ class EditDrinkTest {
     @Test
     fun `ai suggestions update when ingredient added`() = runTest{
         val drink = Drink(name="drink1")
-        val viewModel = EditDrinkViewModel(ai, drink)
+        val viewModel = EditDrinkViewModel(ai, repo, drink)
         advanceUntilIdle()
         assertEquals(listOf(0, 1), viewModel.suggestion.value)
         viewModel.addIngredient(0)
@@ -127,7 +129,7 @@ class EditDrinkTest {
     @Test
     fun `ai suggestions update when base changed`() = runTest{
         val drink = Drink(name="drink1")
-        val viewModel = EditDrinkViewModel(ai, drink)
+        val viewModel = EditDrinkViewModel(ai, repo, drink)
         advanceUntilIdle()
         assertEquals(listOf(0, 1), viewModel.suggestion.value)
         viewModel.setBase(1)

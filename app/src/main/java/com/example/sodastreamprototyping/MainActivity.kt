@@ -22,8 +22,8 @@ class MainActivity : ComponentActivity() {
 
                 // Side-effect to determine the start destination
                 LaunchedEffect(Unit) {
-                    val isLoggedIn = UserPreferences.isLoggedIn(this@MainActivity)
-                    if (isLoggedIn) {
+//                    val isLoggedIn = UserPreferences.isLoggedIn(this@MainActivity)
+                    if (false) {
                         val refreshToken = UserPreferences.getRefreshToken(this@MainActivity)
                         val accessToken = UserPreferences.getAccessToken(this@MainActivity)
 

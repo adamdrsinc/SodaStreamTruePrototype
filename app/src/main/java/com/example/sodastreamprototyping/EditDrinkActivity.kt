@@ -19,7 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -43,7 +42,6 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
     val newDrink by editDrinkViewModel.drink.collectAsState()
     val suggestions by editDrinkViewModel.suggestion.collectAsState()
     val bases by editDrinkViewModel.bases.collectAsState()
-    val flavors by editDrinkViewModel.flavors.collectAsState()
 
     var buttonText = "Save Changes"
     var titleText: String = "Edit Drink"
@@ -53,9 +51,7 @@ fun EditDrinkPage(navController: NavController, drink: Drink) {
         buttonText = "Add Drink"
     }
 
-    val drinkFlavors =
-        if (flavors.isEmpty()) context.resources.getStringArray(R.array.drink_flavors).toList()
-        else flavors
+    val drinkFlavors = context.resources.getStringArray(R.array.drink_flavors).toList()
 
     MainLayout(navController = navController) { innerPadding ->
         Column(
@@ -351,8 +347,6 @@ fun CurrentDrinkSummary(drink: Drink, increment: (Int) -> Boolean, decrement: (I
 
 @Composable
 fun IceQuantitySlider(drink: Drink, setIce: (Int) -> Unit) {
-    val config = LocalConfiguration.current
-    val screenWidth = config.screenWidthDp
 
     // State to hold the slider position, can't be stored in drink since this is a float
     val sliderPosition = remember { mutableFloatStateOf(drink.iceQuantity.toFloat()) }

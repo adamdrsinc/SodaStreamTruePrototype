@@ -2,13 +2,11 @@ package com.example.practice
 
 import android.content.Context
 import android.util.Log
-import android.widget.Toast
 import com.android.volley.*
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.example.sodastreamprototyping.Drink
-import com.example.sodastreamprototyping.Repository
 import com.example.sodastreamprototyping.UserPreferences
 import dagger.hilt.android.qualifiers.ApplicationContext
 import org.json.JSONArray
@@ -94,7 +92,76 @@ class ApiRequestHelper @Inject constructor(@ApplicationContext val context: Cont
         requestQueue.add(jsonObjectRequest)
     }
 
-    companion object {
+    fun getOrderHistory(
+        onSuccess: (List<Pair<Int, Boolean>>) -> Unit,
+        onError: () -> Unit
+    ) {
+        val url = "${BASE_URL}/orders/history"
+
+        val jsonObjectRequest = object : JsonArrayRequest(
+            Request.Method.GET, url, null,
+            { response ->
+                val openOrders = mutableListOf<Pair<Int, Boolean>>()
+                for(i in 0 until response.length()){
+                    openOrders.add(Pair(
+                        response.getJSONObject(i).getString("id").toInt(),
+                        response.getJSONObject(i).getString("completed").toBoolean()))
+                }
+                //TODO parse request, get list of Pair<Int, Boolean>
+                val mock = arrayOf(Pair(1, false))
+                onSuccess(openOrders.toList())
+            },
+            { error ->
+                Log.e("API_ERROR", error.toString())
+                onError()
+            }
+        ) {
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Authorization"] = "Bearer ${UserPreferences.getAccessToken(context)}"
+                return headers
+            }
+        }
+
+        requestQueue.add(jsonObjectRequest)
+    }
+
+    fun completeOrder(
+        id: Int,
+        onSuccess: () -> Unit,
+        onError: () -> Unit
+    ){
+        //Add the order id to the endpoint
+        var urlBase = "${BASE_URL}/orders/here/"
+        var orderID = id.toString()
+
+        val url = urlBase + orderID
+
+        val jsonObjectRequest = object : JsonObjectRequest(
+            Request.Method.POST, url, null,
+            {
+                    response ->
+                onSuccess()
+            },
+            {
+                    error ->
+                Log.e("API_ERROR", error.toString())
+                onError()
+            }
+
+        ){
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Authorization"] = "Bearer ${UserPreferences.getAccessToken(context)}"
+                return headers
+            }
+        }
+
+        requestQueue.add(jsonObjectRequest)
+    }
+
+
+        companion object {
         private const val BASE_URL = "http://10.0.2.2:8080"
 
         // Function to refresh access token
